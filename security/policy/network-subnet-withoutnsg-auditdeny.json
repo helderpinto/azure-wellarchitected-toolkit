@@ -1,0 +1,85 @@
+{
+    "mode": "All",
+    "parameters": {
+        "effectType": {
+            "type": "String",
+            "defaultValue": "deny",
+            "allowedValues": [
+                "audit",
+                "deny",
+                "disabled"
+            ],
+            "metadata": {
+                "displayName": "Effect",
+                "description": "Enable or disable the execution of the policy"
+            }
+        }
+    },
+    "policyRule": {
+        "if": {
+            "anyOf": [
+                {
+                    "allOf": [
+                        {
+                            "field": "type",
+                            "equals": "Microsoft.Network/virtualNetworks"
+                        },
+                        {
+                            "count": {
+                                "field": "Microsoft.Network/virtualNetworks/subnets[*]",
+                                "where": {
+                                    "allOf": [
+                                        {
+                                            "not": {
+                                                "field": "Microsoft.Network/virtualNetworks/subnets[*].networkSecurityGroup.id",
+                                                "exists": "true"
+                                            }
+                                        },
+                                        {
+                                            "not": {
+                                                "field": "Microsoft.Network/virtualNetworks/subnets[*].name",
+                                                "in": [
+                                                    "AzureFirewallSubnet",
+                                                    "GatewaySubnet",
+                                                    "AzureBastionSubnet"
+                                                ]
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            "greater": 0
+                        }
+                    ]
+                },
+                {
+                    "allOf": [
+                        {
+                            "field": "type",
+                            "equals": "Microsoft.Network/virtualNetworks/subnets"
+                        },
+                        {
+                            "not": {
+                                "field": "Microsoft.Network/virtualNetworks/subnets/networkSecurityGroup.id",
+                                "exists": "true"
+                            }
+                        },
+                        {
+                            "not": {
+                                "field": "name",
+                                "in": [
+                                    "AzureFirewallSubnet",
+                                    "GatewaySubnet",
+                                    "AzureBastionSubnet"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        "then": {
+            "effect": "[parameters('effectType')]"
+        }
+    }
+}

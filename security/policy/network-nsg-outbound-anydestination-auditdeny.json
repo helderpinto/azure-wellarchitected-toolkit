@@ -1,0 +1,81 @@
+{
+    "mode": "All",
+    "parameters": {
+        "effectType": {
+            "type": "String",
+            "defaultValue": "deny",
+            "allowedValues": [
+                "audit",
+                "deny",
+                "disabled"
+            ],
+            "metadata": {
+                "displayName": "Effect",
+                "description": "Enable or disable the execution of the policy"
+            }
+        }
+    },
+    "policyRule": {
+        "if": {
+            "allOf": [
+                {
+                    "anyOf": [
+                        {
+                            "field": "type",
+                            "equals": "Microsoft.Network/networkSecurityGroups"
+                        },
+                        {
+                            "field": "type",
+                            "equals": "Microsoft.Network/networkSecurityGroups/securityRules"
+                        }
+                    ]
+                },
+                {
+                    "anyOf": [
+                        {
+                            "allOf": [
+                                {
+                                    "field": "Microsoft.Network/networkSecurityGroups/securityRules/access",
+                                    "equals": "Allow"
+                                },
+                                {
+                                    "field": "Microsoft.Network/networkSecurityGroups/securityRules/direction",
+                                    "equals": "Outbound"
+                                },
+                                {
+                                    "field": "Microsoft.Network/networkSecurityGroups/securityRules/destinationAddressPrefix",
+                                    "equals": "*"
+                                }
+                            ]
+                        },
+                        {
+                            "count": {
+                                "field": "Microsoft.Network/networkSecurityGroups/securityRules[*]",
+                                "where": {
+                                    "allOf": [
+                                        {
+                                            "field": "Microsoft.Network/networkSecurityGroups/securityRules[*].access",
+                                            "equals": "Allow"
+                                        },
+                                        {
+                                            "field": "Microsoft.Network/networkSecurityGroups/securityRules[*].direction",
+                                            "equals": "Outbound"
+                                        },
+                                        {
+                                            "field": "Microsoft.Network/networkSecurityGroups/securityRules[*].destinationAddressPrefix",
+                                            "equals": "*"
+                                        }
+                                    ]
+                                      }
+                            },
+                            "greater": 0
+                        }
+                    ]
+                }
+            ]
+        },
+        "then": {
+            "effect": "[parameters('effectType')]"
+        }
+    }
+}
