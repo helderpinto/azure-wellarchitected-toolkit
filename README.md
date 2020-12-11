@@ -5,9 +5,9 @@ This repository contains a playbook and toolkit for Azure Infra architects and e
 The playbook is organized as follows:
 
 1. Introduction
-2. Cost Optimization
-3. Operational Excellence
-4. Performance Efficiency
+2. [Cost Optimization](cost-optimization/README.md)
+3. [Operational Excellence](operational-excellence/README.md)
+4. [Performance Efficiency](performance-efficiency/README.md)
 5. Reliability
 6. Security
 
