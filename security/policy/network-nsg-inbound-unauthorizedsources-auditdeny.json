@@ -13,6 +13,17 @@
                 "displayName": "Effect",
                 "description": "Enable or disable the execution of the policy"
             }
+        },
+        "sourceAddressPrefix": {
+            "type": "Array",
+            "defaultValue": [
+                "*",
+                "Internet"
+            ],
+            "metadata": {
+                "displayName": "Source Address Prefix",
+                "description": "Source address prefix to audit/deny, e.g., Any+Internet, Any only, Internet only"
+            }
         }
     },
     "policyRule": {
@@ -44,7 +55,7 @@
                                 },
                                 {
                                     "field": "Microsoft.Network/networkSecurityGroups/securityRules/sourceAddressPrefix",
-                                    "equals": "*"
+                                    "in": "[parameters('sourceAddressPrefix')]"
                                 }
                             ]
                         },
@@ -63,7 +74,7 @@
                                         },
                                         {
                                             "field": "Microsoft.Network/networkSecurityGroups/securityRules[*].sourceAddressPrefix",
-                                            "equals": "*"
+                                            "in": "[parameters('sourceAddressPrefix')]"
                                         }
                                     ]
                                 }

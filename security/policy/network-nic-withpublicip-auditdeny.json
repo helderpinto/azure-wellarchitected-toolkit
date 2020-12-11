@@ -1,0 +1,41 @@
+{
+    "mode": "All",
+    "parameters": {
+        "effectType": {
+            "type": "String",
+            "defaultValue": "deny",
+            "allowedValues": [
+                "audit",
+                "deny",
+                "disabled"
+            ],
+            "metadata": {
+                "displayName": "Effect",
+                "description": "Enable or disable the execution of the policy"
+            }
+        }
+    },
+    "policyRule": {
+        "if": {
+                "allOf": [
+                {
+                    "field": "type",
+                    "equals": "Microsoft.Network/networkInterfaces"
+                },
+                {
+                    "count": {
+                        "field": "Microsoft.Network/networkInterfaces/ipconfigurations[*]",
+                        "where": {
+                            "field": "Microsoft.Network/networkInterfaces/ipconfigurations[*].publicIpAddress.id",
+                            "exists": "true"
+                        }
+                    },
+                    "greater": 0
+                }
+            ]
+        },
+        "then": {
+            "effect": "[parameters('effectType')]"
+        }
+    }
+}
