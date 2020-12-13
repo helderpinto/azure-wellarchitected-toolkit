@@ -8,7 +8,7 @@ The playbook is organized as follows:
 2. [Cost Optimization](cost-optimization/README.md)
 3. [Operational Excellence](operational-excellence/README.md)
 4. [Performance Efficiency](performance-efficiency/README.md)
-5. Reliability
-6. Security
+5. [Reliability](reliability/README.md)
+6. [Security](security/README.md)
 
 For each Well-Architected pillar, you'll also find a set of tools that will be useful for putting into practice well architected principles.

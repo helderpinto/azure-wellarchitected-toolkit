@@ -1,5 +1,16 @@
 # Cost Optimization
 
+## Questions to make 
+
+* What actions are you taking to optimize cloud costs?
+* How do you ensure that cloud resources are appropriately provisioned?
+* How is your organization modeling cloud costs?
+* How do you manage the storage footprint of your digital assets?
+* How are you monitoring your costs?
+* What trade-offs have you made to optimize for cost?
+
+## Actions
+
 [Docs](https://docs.microsoft.com/en-us/azure/architecture/framework/cost/)
 
 * Capture requirements (compute, storage, traffic, security, high availability, business continuity, monitoring, management & automation)

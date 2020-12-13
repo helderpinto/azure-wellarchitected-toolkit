@@ -1,5 +1,22 @@
 # Operational Excellence
 
+## Questions to make 
+
+* Have you defined key scenarios for your workload and how they relate to operational targets and non-functional requirements?
+* How are you monitoring your resources?
+* How do you interpret the collected data to inform about application health?
+* How do you visualize workload data and then alert relevant teams when issues occur?
+* How are you using Azure platform notifications and updates?
+* What is your approach to recovery and failover?
+* How are scale operations performed?
+* How are you managing the configuration of your workload?
+* What operational considerations are you making regarding the deployment of your workload?
+* What operational considerations are you making regarding the deployment of your infrastructure?
+* How are you testing and validating your workload?
+* What processes and procedures have you adopted to optimize workload operability?
+
+## Actions
+
 [Docs](https://docs.microsoft.com/en-us/azure/architecture/framework/devops/overview)
 
 * Establish a CI/CD pipeline
