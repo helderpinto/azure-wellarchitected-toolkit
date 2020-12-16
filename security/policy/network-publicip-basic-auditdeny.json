@@ -1,0 +1,35 @@
+{
+    "mode": "All",
+    "parameters": {
+        "effectType": {
+            "type": "String",
+            "defaultValue": "audit",
+            "allowedValues": [
+                "audit",
+                "deny",
+                "disabled"
+            ],
+            "metadata": {
+                "displayName": "Effect",
+                "description": "Enable or disable the execution of the policy"
+            }
+        }
+    },
+    "policyRule": {
+        "if": {
+            "allOf": [
+                {
+                    "field": "type",
+                    "equals": "Microsoft.Network/publicIPAddresses"
+                },
+                {
+                    "field": "Microsoft.Network/publicIPAddresses/sku.name",
+                    "equals": "Basic"
+                }
+            ]
+        },
+        "then": {
+            "effect": "[parameters('effectType')]"
+        }
+    }
+}

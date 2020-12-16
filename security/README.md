@@ -34,3 +34,8 @@
 * Enforce Conditional Access for admins
 * Promote usage of Private Link for network-only access to PaaS resources
 * Validate data encryptin at rest and in transit
+
+## Tools
+
+* Policies
+* NSG assessments (Subnets and VMs without NSGs, NSG rules - improve to include priority)

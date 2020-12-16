@@ -1,0 +1,57 @@
+{
+    "mode": "All",
+    "parameters": {
+        "effectType": {
+            "type": "String",
+            "defaultValue": "AuditIfNotExists",
+            "allowedValues": [
+                "AuditIfNotExists",
+                "Disabled"
+            ],
+            "metadata": {
+                "displayName": "Effect",
+                "description": "Enable or disable the execution of the policy"
+            }
+        }
+    },
+    "policyRule": {
+        "if": {
+            "field": "type",
+            "equals": "Microsoft.Network/networkSecurityGroups"
+        },
+        "then": {
+            "effect": "[parameters('effectType')]",
+            "details": {
+                "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+                "existenceCondition": {
+                    "allOf": [
+                        {
+                            "field": "Microsoft.Network/networkSecurityGroups/securityRules/direction",
+                            "equals": "Outbound"
+                        },
+                        {
+                            "field": "Microsoft.Network/networkSecurityGroups/securityRules/access",
+                            "equals": "Deny"
+                        },
+                        {
+                            "field": "Microsoft.Network/networkSecurityGroups/securityRules/sourceAddressPrefix",
+                            "equals": "*"
+                        },
+                        {
+                            "field": "Microsoft.Network/networkSecurityGroups/securityRules/destinationAddressPrefix",
+                            "equals": "*"
+                        },
+                        {
+                            "field": "Microsoft.Network/networkSecurityGroups/securityRules/sourcePortRange",
+                            "equals": "*"
+                        },
+                        {
+                            "field": "Microsoft.Network/networkSecurityGroups/securityRules/destinationPortRange",
+                            "equals": "*"
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}
