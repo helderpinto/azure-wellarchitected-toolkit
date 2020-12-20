@@ -13,6 +13,7 @@
 ## Actions
 
 [Docs](https://docs.microsoft.com/en-us/azure/architecture/framework/security/overview)
+[Security Compass](https://docs.microsoft.com/en-us/security/compass/compass)
 
 * Review Azure Identity Management [best practices](https://docs.microsoft.com/en-us/azure/security/fundamentals/identity-management-best-practices)
 * Review PaaS native security controls

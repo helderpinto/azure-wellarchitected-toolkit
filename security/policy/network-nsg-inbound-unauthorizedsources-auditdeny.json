@@ -16,10 +16,7 @@
         },
         "sourceAddressPrefix": {
             "type": "Array",
-            "defaultValue": [
-                "*",
-                "Internet"
-            ],
+            "defaultValue": ["*","Internet"],
             "metadata": {
                 "displayName": "Source Address Prefix",
                 "description": "Source address prefix to audit/deny, e.g., Any+Internet, Any only, Internet only"

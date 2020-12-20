@@ -16,10 +16,7 @@
         },
         "sourceAddressPrefix": {
             "type": "Array",
-            "defaultValue": [
-                "*",
-                "Internet"
-            ],
+            "defaultValue": ["*", "Internet"],
             "metadata": {
                 "displayName": "Source Address Prefix",
                 "description": "Source address prefix to audit/deny, e.g., Any+Internet, Any only, Internet only"
@@ -27,9 +24,7 @@
         },
         "destinationPortRange": {
             "type": "Array",
-            "defaultValue": [
-                "*"
-            ],
+            "defaultValue": ["*"],
             "metadata": {
                 "displayName": "Destination Port",
                 "description": "Destination port to which the rule applies, e.g., Any, Any+22+3389, etc."
