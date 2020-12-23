@@ -1,5 +1,7 @@
 # Performance Efficiency
 
+TODO: detail initiatives
+
 ## Questions to make
 
 * How are you designing your workload to scale?
@@ -9,7 +11,7 @@
 * How are you managing your data to handle scale?
 * How are you monitoring to ensure the workload is scaling appropriately?
 
-## Actions
+## Initiatives
 
 [Docs](https://docs.microsoft.com/en-us/azure/architecture/framework/scalability/overview)
 

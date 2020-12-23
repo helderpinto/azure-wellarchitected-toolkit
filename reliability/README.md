@@ -1,5 +1,7 @@
 # Reliability
 
+TODO: detail initiatives
+
 ## Questions to make
 
 * What reliability targets and metrics have you defined for your application?
@@ -16,7 +18,7 @@
 * How do you test the application to ensure it is fault tolerant?
 * How do you monitor and measure application health?
 
-## Actions
+## Initiatives
 
 [Docs](https://docs.microsoft.com/en-us/azure/architecture/framework/resiliency/overview)
 

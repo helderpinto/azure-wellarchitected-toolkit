@@ -1,5 +1,7 @@
 # Operational Excellence
 
+TODO: detail initiatives
+
 ## Questions to make 
 
 * Have you defined key scenarios for your workload and how they relate to operational targets and non-functional requirements?
@@ -15,7 +17,7 @@
 * How are you testing and validating your workload?
 * What processes and procedures have you adopted to optimize workload operability?
 
-## Actions
+## Initiatives
 
 [Docs](https://docs.microsoft.com/en-us/azure/architecture/framework/devops/overview)
 

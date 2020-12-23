@@ -40,6 +40,7 @@ Don't get it wrong, but using the cloud without visibility over how you spend yo
         * Get insights about Azure Hybrid Benefit and Reserved Instances usage and savings
         * A Power BI Pro license is required to install and use the app.
         * To connect to data, you must use an Enterprise Administrator account. The Enterprise Administrator (read only) role is supported.
+    * Remediate [Azure Advisor cost recommendations](https://docs.microsoft.com/en-us/azure/advisor/advisor-cost-recommendations).
 * Give costs visibility to teams with [appropriate Azure RBAC](https://docs.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/track-costs#provide-the-right-level-of-cost-access). Remember: **if we don't know what we spend, we don't care about how much we spend**.
 * Identify custom cost optimization opportunities with the [Azure Optimization Engine](https://github.com/helderpinto/AzureOptimizationEngine)
     * Deploy the engine in your environment and assess the initial results
@@ -47,17 +48,22 @@ Don't get it wrong, but using the cloud without visibility over how you spend yo
   
 ### Use the right consumption model
 
-* Buy Reserved Instances
-* Leverage Azure Hybrid Benefit
-* Serverless/consumption-based vs. permanent compute allocation
+* Save on permanent costs with [Azure Reservations](https://docs.microsoft.com/en-us/azure/cost-management-billing/reservations/save-compute-costs-reservations) - Azure Advisor does a great job in analyzing your workloads and recommending which are good candidates for Reservations. Leverage those saving opportunities - you can save up to 72% from pay-as-you-go prices.
+* Leverage [Azure Hybrid Benefit](https://azure.microsoft.com/en-us/pricing/hybrid-benefit/faq/) - bring your on-premises Windows Server and SQL Server licensing to Azure and, together with Reservations, save up to 85% on your Windows/SQL-based Azure workload costs.
+* Serverless/consumption-based vs. permanent compute allocation - if you have resource permanently allocated for workloads that have occasional usage, consider rearchitecting your solution to a [serverless consumption model](https://azure.microsoft.com/en-us/solutions/serverless/), where you allocate resources only when they're actually needed. Conversely, keeping a serverless approach for workloads that are under constant usage can become less cost and performance efficient when compared to a permanent resource allocation model.
 * Consolidate resources when possible (e.g., containerization, multiple databases in same engine/pool, multiple web apps in same App Service plan, etc.)
-* Implement auto-scaling or automated shutdown/startup
+* Implement [auto-scaling](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/autoscale-overview) or [automated shutdown/startup](https://docs.microsoft.com/en-us/azure/automation/automation-solution-vm-management).
 
 ### Standardize resources usage
 
-* Implement resource consumption rules with Azure Policy
-* Automate resource provisioning with ARM templates and Azure DevOps or Azure Automation
+* Implement resource consumption rules with [Azure Policy](https://docs.microsoft.com/en-us/azure/governance/policy/overview) - identify the resource types and service SKUs that your organization requires and limit Azure resource provisioning to allowed types/SKUs with Azure Policy built-in or custom definitions. Denying unapproved resource provisioning can save you from unnecessary cost spikes. Here are some examples of built-in Azure Policies that can help:
+    * Not allowed resource types ([/providers/Microsoft.Authorization/policyDefinitions/6c112d4e-5bc7-47ae-a041-ea2d9dccd749](https://portal.azure.com/#blade/Microsoft_Azure_Policy/PolicyDetailBlade/definitionId/%2Fproviders%2FMicrosoft.Authorization%2FpolicyDefinitions%2F6c112d4e-5bc7-47ae-a041-ea2d9dccd749))
+    * Allowed storage account SKUs ([/providers/Microsoft.Authorization/policyDefinitions/7433c107-6db4-4ad1-b57a-a76dce0154a1](https://portal.azure.com/#blade/Microsoft_Azure_Policy/PolicyDetailBlade/definitionId/%2Fproviders%2FMicrosoft.Authorization%2FpolicyDefinitions%2F7433c107-6db4-4ad1-b57a-a76dce0154a1))
+    * Allowed resource types ([/providers/Microsoft.Authorization/policyDefinitions/a08ec900-254a-4555-9bf5-e42af04b5c5c](https://portal.azure.com/#blade/Microsoft_Azure_Policy/PolicyDetailBlade/definitionId/%2Fproviders%2FMicrosoft.Authorization%2FpolicyDefinitions%2Fa08ec900-254a-4555-9bf5-e42af04b5c5c))
+    * Allowed virtual machine size SKUs ([/providers/Microsoft.Authorization/policyDefinitions/cccc23c7-8427-4f53-ad12-b6a63eb452b3](https://portal.azure.com/#blade/Microsoft_Azure_Policy/PolicyDetailBlade/definitionId/%2Fproviders%2FMicrosoft.Authorization%2FpolicyDefinitions%2Fcccc23c7-8427-4f53-ad12-b6a63eb452b3))
+* Automate resource provisioning with [ARM templates](https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/overview) - by standardizing the way resources are provisioned, e.g., with Azure Resource Manager templates, you will avoid configuration mistakes that sometimes increase the cost of your solutions.
 
 ### Eliminate waste
 
-* Clean diagnostics logs
+* Implement [lifecycle management](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-lifecycle-management-concepts?tabs=azure-portal) in your Storage Accounts, by deleting objects that are no longer needed (e.g., old backups/logs) or by changing their storage tier to a cooler and cheaper option, according to their access patterns.
+* If, for some reason, you enabled the Azure Diagnostics extension in your Virtual Machines, be aware that this can become after some time an important part of your Storage costs. By default, the extension writes data to Azure Storage Tables (more expensive than Blobs) and it does not support a retention policy for Tables - this means your costs are ever increasing. If you don't need anymore to collect logs or metrics with the Azure Diagnostics extension, follow the [Azure Diagnostics cleanup guide](diagnostics-extension-cleanup/README.md).

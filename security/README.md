@@ -1,5 +1,7 @@
 # Security
 
+TODO: detail initiatives
+
 ## Questions to make
 
 * What design considerations did you make in your workload in regards to security?
@@ -10,7 +12,7 @@
 * What tradeoffs do you need to make to meet your security goals?
 * How are you ensuring your critical accounts are protected?
 
-## Actions
+## Initiatives
 
 [Docs](https://docs.microsoft.com/en-us/azure/architecture/framework/security/overview)
 [Security Compass](https://docs.microsoft.com/en-us/security/compass/compass)

@@ -1,0 +1,1 @@
+# Azure Diagnostics extension cleanup
