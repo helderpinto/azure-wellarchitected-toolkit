@@ -4,11 +4,11 @@ This repository contains a playbook and toolkit for Azure architects and enginee
 
 The playbook is organized as follows:
 
-1. [Cost Optimization](cost-optimization/README.md)
-2. [Operational Excellence](operational-excellence/README.md)
-3. [Performance Efficiency](performance-efficiency/README.md)
-4. [Reliability](reliability/README.md)
-5. [Security](security/README.md)
+1. [Cost Optimization](cost-optimization/)
+2. [Operational Excellence](operational-excellence/)
+3. [Performance Efficiency](performance-efficiency/)
+4. [Reliability](reliability/)
+5. [Security](security/)
 
 For each Well-Architected pillar, you'll also find:
 

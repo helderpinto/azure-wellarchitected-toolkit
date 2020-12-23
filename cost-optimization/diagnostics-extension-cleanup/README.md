@@ -65,3 +65,4 @@ In this final step, you'll use the CSV generated in step 1 and order the removal
 
 `.\Remove-VmDiagnosticsTables.ps1 -StorageAccountsCsvPath <path to the storage account list CSV generated in step 1> [-Cloud <AzureCloud | AzureChinaCloud | AzureGermanCloud | AzureUSGovernment>] [-TargetSubscriptionId <subscription Id>]`
 
+In the next day, you'll likely notice a drop in your Azure Storage Table costs. Happy cleanup!
