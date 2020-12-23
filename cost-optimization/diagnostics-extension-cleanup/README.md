@@ -10,8 +10,8 @@ The procedure is divided into three steps:
 
 ## Requirements
 
-* Az PowerShell module
-* Az.ResourceGraph module
+* [Az PowerShell modules](https://docs.microsoft.com/en-us/powershell/azure/install-Az-ps)
+* [Az.ResourceGraph module](https://docs.microsoft.com/en-us/azure/governance/resource-graph/first-query-powershell#add-the-resource-graph-module)
 * The user executing the scripts should have the Contributor role in the Azure subscriptions. If virtual machines have resource locks, then the user must have the Owner role.
 
 ## Step 1 - Extract the list of Storage Accounts containing Azure Diagnostics data
