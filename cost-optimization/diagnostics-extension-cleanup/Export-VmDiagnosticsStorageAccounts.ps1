@@ -10,6 +10,8 @@ if (-not($ctx))
     $ctx = Connect-AzAccount -Environment $Cloud
 }
 
+Write-Output "Generating the list of Storage Accounts used by the Azure Diagnostics extension (User: $($ctx.Account.Id); Tenant Id: $($ctx.Tenant.Id))"
+
 $subscriptions = Get-AzSubscription | ForEach-Object { "$($_.Id)"}
 
 $queryText = @"
@@ -26,6 +28,8 @@ resources
 "@
 
 $diagStorageAccounts = Search-AzGraph -Query $queryText -Subscription $subscriptions
+
+Write-Output "Found $($diagStorageAccounts.Count) storage accounts"
 
 $csvExportPath = "diag-storageaccount-list-$Cloud.csv"
 $diagStorageAccounts | Export-Csv -Path $csvExportPath -NoTypeInformation
