@@ -42,3 +42,6 @@ TODO: detail initiatives
 
 * Policies
 * NSG assessments (Subnets and VMs without NSGs, NSG rules - improve to include priority)
+* AzGovViz
+* AzSK
+* Other assessment tools
