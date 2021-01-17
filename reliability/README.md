@@ -34,14 +34,13 @@ Depending on your reliability requirements, Azure provides many high-availabilit
 
 Once reliability requirements are clearly identified, you have several tools and actions at your disposal to validate whether your workloads are applying reliability best practices. Here are some actions that should be part of your todo list:
 
+* Based on the specified availability targets and reliability requirements, design and implement a [comprehensive monitoring solution](https://docs.microsoft.com/en-us/azure/azure-monitor/monitor-reference) covering your workload end-to-end.
 * Review the [Well-Architected Framework resiliency checklist](https://docs.microsoft.com/en-us/azure/architecture/checklist/resiliency-per-service)
 * Remediate [Azure Advisor reliability recommendations](https://docs.microsoft.com/en-us/azure/advisor/advisor-high-availability-recommendations).
-* Identify custom reliability optimization opportunities with the [Azure Optimization Engine](https://github.com/helderpinto/AzureOptimizationEngine)
-    * Deploy the engine in your environment and assess the initial results
-    * Develop custom recommendations if needed
 * Validate application and services' data and keys/secrets are being backed up according to reliability requirements
 * Validate whether workloads have a disaster recovery strategy according to requirements
 * Validate hybrid networking meets reliability requirements (for example, validate VPN/ExpressRoute active-active or active-passive setups)
+* Consider re-architecting IaaS workloads into PaaS services for improved reliability and manageability
 * Enforce reliability best practices with [Azure Policy](https://docs.microsoft.com/en-us/azure/governance/policy/overview). Here are some examples of built-in Azure Policies that can help:
     * Azure Backup should be enabled for Virtual Machines ([/providers/Microsoft.Authorization/policyDefinitions/013e242c-8828-4970-87b3-ab247555486d](https://portal.azure.com/#blade/Microsoft_Azure_Policy/PolicyDetailBlade/definitionId/%2Fproviders%2FMicrosoft.Authorization%2FpolicyDefinitions%2F013e242c-8828-4970-87b3-ab247555486d))
     * Configure backup on VMs with a given tag to an existing recovery services vault in the same location ([/providers/Microsoft.Authorization/policyDefinitions/345fa903-145c-4fe1-8bcd-93ec2adccde8](https://portal.azure.com/#blade/Microsoft_Azure_Policy/PolicyDetailBlade/definitionId/%2Fproviders%2FMicrosoft.Authorization%2FpolicyDefinitions%2F345fa903-145c-4fe1-8bcd-93ec2adccde8))
@@ -51,9 +50,13 @@ Once reliability requirements are clearly identified, you have several tools and
     * Geo-redundant backup should be enabled for Azure Database for PostgreSQL ([/providers/Microsoft.Authorization/policyDefinitions/48af4db5-9b8b-401c-8e74-076be876a430](https://portal.azure.com/#blade/Microsoft_Azure_Policy/PolicyDetailBlade/definitionId/%2Fproviders%2FMicrosoft.Authorization%2FpolicyDefinitions%2F48af4db5-9b8b-401c-8e74-076be876a430))    
     * Long-term geo-redundant backup should be enabled for Azure SQL Databases ([/providers/Microsoft.Authorization/policyDefinitions/d38fc420-0735-4ef3-ac11-c806f651a570](https://portal.azure.com/#blade/Microsoft_Azure_Policy/PolicyDetailBlade/definitionId/%2Fproviders%2FMicrosoft.Authorization%2FpolicyDefinitions%2Fd38fc420-0735-4ef3-ac11-c806f651a570))    
     * Geo-redundant storage should be enabled for Storage Accounts ([/providers/Microsoft.Authorization/policyDefinitions/bf045164-79ba-4215-8f95-f8048dc1780b](https://portal.azure.com/#blade/Microsoft_Azure_Policy/PolicyDetailBlade/definitionId/%2Fproviders%2FMicrosoft.Authorization%2FpolicyDefinitions%2Fbf045164-79ba-4215-8f95-f8048dc1780b))
+* Identify custom reliability optimization opportunities with the [Azure Optimization Engine](https://github.com/helderpinto/AzureOptimizationEngine)
+    * Deploy the engine in your environment and assess the initial results
+    * Develop custom recommendations if needed
 
 ### Incorporate reliability in release engineering procedures
 
 * Test for common failure scenarios by [triggering actual failures or by simulating them](https://docs.microsoft.com/en-us/azure/architecture/framework/resiliency/testing)
-* Design and automate the [release processes to maximize availability](https://docs.microsoft.com/en-us/azure/architecture/framework/resiliency/overview#deploy-the-application-consistently), including rollback procedures
+* Design and automate the [release processes to maximize availability](https://docs.microsoft.com/en-us/azure/architecture/framework/resiliency/overview#deploy-the-application-consistently), including infrastructure as code and rollback procedures
+* Perform disaster recovery testing on a regular basis
 
