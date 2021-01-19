@@ -1,0 +1,42 @@
+{
+    "mode": "All",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "allowedPrincipalTypes": {
+        "type": "array",
+        "metadata": {
+          "displayName": "Allowed Principal Types",
+          "description": "One or more of the following principal types: User, Group, ServicePrincipal, Application, MSI"
+        },
+        "allowedValues": [
+          "User",
+          "Group",
+          "ServicePrincipal",
+          "Application",
+          "MSI"
+        ],
+        "defaultValue": [ "Group", "ServicePrincipal", "MSI" ]
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "Microsoft.Authorization/roleAssignments/principalType",
+        "notIn": "[parameters('allowedPrincipalTypes')]"
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  }
