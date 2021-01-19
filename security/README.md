@@ -1,6 +1,6 @@
 # Security
 
-The questions and initiatives below are based on the [Security pillar of the Well-Architected Framework](https://docs.microsoft.com/en-us/azure/architecture/framework/security/overview) and on the [Microsoft Security Best Practices](https://docs.microsoft.com/en-us/security/compass/compass) (formerly known as the Azure Security Compass or Microsoft Security Compass). Reflect on each question and priorize/plan the initiatives of the Security playbook.
+The questions and initiatives below are based on the [Security pillar of the Well-Architected Framework](https://docs.microsoft.com/en-us/azure/architecture/framework/security/overview), on the [Microsoft Security Best Practices](https://docs.microsoft.com/en-us/security/compass/compass) (formerly known as the Azure Security Compass or Microsoft Security Compass) and on the [Azure Security Benchmark](https://docs.microsoft.com/en-us/azure/security/benchmarks/overview). Reflect on each question and priorize/plan the initiatives of the Security playbook.
 
 ## Questions to make
 
@@ -49,7 +49,6 @@ The questions and initiatives below are based on the [Security pillar of the Wel
 * Promote usage of Private Link for private network-only access to PaaS resources
 * Assess the need for protecting public-facing web applications with a Web Application Firewall (WAF) for Azure Front Door or Application Gateway.
 * Validate data encryption at rest and in transit ([see some best practices](https://docs.microsoft.com/en-us/azure/security/fundamentals/data-encryption-best-practices)).
-* Evaluate security using benchmarks
 
 ### Incorporate security in release engineering procedures
 
