@@ -60,3 +60,4 @@ The questions and initiatives below are based on the [Security pillar of the Wel
 * NSG assessments (Subnets and VMs without NSGs, NSG rules - improve to include priority)
 * AzGovViz
 * Other assessment tools
+* NSG Changes workbook (original from [Brad Watts](https://github.com/bwatts64/AzureMonitor/blob/master/Workbooks/NSGWorkbook.json))

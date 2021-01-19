@@ -1,0 +1,577 @@
+{
+    "version": "Notebook/1.0",
+    "items": [
+        {
+            "type": 12,
+            "content": {
+                "version": "NotebookGroup/1.0",
+                "groupType": "editable",
+                "items": [
+                    {
+                        "type": 9,
+                        "content": {
+                            "version": "KqlParameterItem/1.0",
+                            "crossComponentResources": [
+                                "{Workspace}"
+                            ],
+                            "parameters": [
+                                {
+                                    "id": "7775fb87-5120-4a9c-b721-afbc4110b016",
+                                    "version": "KqlParameterItem/1.0",
+                                    "name": "TimeRange",
+                                    "label": "Time Range",
+                                    "type": 4,
+                                    "isRequired": true,
+                                    "value": {
+                                        "durationMs": 86400000
+                                    },
+                                    "typeSettings": {
+                                        "selectableValues": [
+                                            {
+                                                "durationMs": 300000
+                                            },
+                                            {
+                                                "durationMs": 900000
+                                            },
+                                            {
+                                                "durationMs": 1800000
+                                            },
+                                            {
+                                                "durationMs": 3600000
+                                            },
+                                            {
+                                                "durationMs": 14400000
+                                            },
+                                            {
+                                                "durationMs": 43200000
+                                            },
+                                            {
+                                                "durationMs": 86400000
+                                            },
+                                            {
+                                                "durationMs": 172800000
+                                            },
+                                            {
+                                                "durationMs": 259200000
+                                            },
+                                            {
+                                                "durationMs": 604800000
+                                            },
+                                            {
+                                                "durationMs": 1209600000
+                                            },
+                                            {
+                                                "durationMs": 2419200000
+                                            },
+                                            {
+                                                "durationMs": 2592000000
+                                            },
+                                            {
+                                                "durationMs": 5184000000
+                                            }
+                                        ],
+                                        "allowCustom": true
+                                    },
+                                    "timeContext": {
+                                        "durationMs": 86400000
+                                    }
+                                },
+                                {
+                                    "id": "d091de0e-87f9-4983-98de-ad7a8865660a",
+                                    "version": "KqlParameterItem/1.0",
+                                    "name": "Subscription",
+                                    "type": 6,
+                                    "multiSelect": true,
+                                    "quote": "'",
+                                    "delimiter": ",",
+                                    "typeSettings": {
+                                        "additionalResourceOptions": [
+                                            "value::all"
+                                        ],
+                                        "includeAll": true,
+                                        "showDefault": false
+                                    },
+                                    "timeContext": {
+                                        "durationMs": 86400000
+                                    },
+                                    "defaultValue": "value::all"
+                                },
+                                {
+                                    "id": "69ba0e84-55be-4971-8b9e-185722510fb0",
+                                    "version": "KqlParameterItem/1.0",
+                                    "name": "ResourceGroup",
+                                    "label": "Resource Group",
+                                    "type": 5,
+                                    "multiSelect": true,
+                                    "quote": "'",
+                                    "delimiter": ",",
+                                    "query": "resourcecontainers | where type == \"microsoft.resources/subscriptions/resourcegroups\" \r\n| project name, id",
+                                    "crossComponentResources": [
+                                        "{Subscription}"
+                                    ],
+                                    "typeSettings": {
+                                        "additionalResourceOptions": [
+                                            "value::all"
+                                        ],
+                                        "showDefault": false
+                                    },
+                                    "timeContext": {
+                                        "durationMs": 86400000
+                                    },
+                                    "defaultValue": "value::all",
+                                    "queryType": 1,
+                                    "resourceType": "microsoft.resourcegraph/resources"
+                                },
+                                {
+                                    "id": "9f629949-f5b9-4d68-be6b-259d264b3f60",
+                                    "version": "KqlParameterItem/1.0",
+                                    "name": "Workspace",
+                                    "label": "LA Workspace",
+                                    "type": 5,
+                                    "isRequired": true,
+                                    "multiSelect": true,
+                                    "quote": "'",
+                                    "delimiter": ",",
+                                    "query": "where type =~ 'microsoft.operationalinsights/workspaces'\n| order by name asc",
+                                    "crossComponentResources": [
+                                        "value::all"
+                                    ],
+                                    "value": [
+                                        "/subscriptions/5f1c1322-cebc-4ea3-8779-fac7d666e18f/resourceGroups/mms-eus/providers/Microsoft.OperationalInsights/workspaces/Gov-Cloud"
+                                    ],
+                                    "typeSettings": {
+                                        "additionalResourceOptions": [
+                                            "value::all"
+                                        ],
+                                        "showDefault": false
+                                    },
+                                    "queryType": 1,
+                                    "resourceType": "microsoft.resourcegraph/resources"
+                                },
+                                {
+                                    "id": "b34d8ae6-ca66-4e88-b78f-9bc54c2e61c2",
+                                    "version": "KqlParameterItem/1.0",
+                                    "name": "NSG",
+                                    "type": 2,
+                                    "isRequired": true,
+                                    "multiSelect": true,
+                                    "quote": "'",
+                                    "delimiter": ",",
+                                    "query": "AzureActivity\r\n| extend Subscription=strcat('/subscriptions/',SubscriptionId)\r\n| where Subscription in~ ({Subscription})\r\n| where ResourceGroup in~ ({ResourceGroup})\r\n| where CategoryValue == 'Administrative'\r\n| where ResourceProviderValue =~ 'microsoft.network'\r\n| where _ResourceId contains \"networkSecurityGroups\"\r\n| extend NSG = tostring(split(_ResourceId,'/')[8])\r\n| distinct NSG\r\n| order by NSG asc",
+                                    "crossComponentResources": [
+                                        "{Workspace}"
+                                    ],
+                                    "typeSettings": {
+                                        "additionalResourceOptions": [
+                                            "value::all"
+                                        ],
+                                        "showDefault": false
+                                    },
+                                    "timeContext": {
+                                        "durationMs": 0
+                                    },
+                                    "timeContextFromParameter": "TimeRange",
+                                    "defaultValue": "value::all",
+                                    "queryType": 0,
+                                    "resourceType": "microsoft.operationalinsights/workspaces"
+                                }
+                            ],
+                            "style": "pills",
+                            "queryType": 0,
+                            "resourceType": "microsoft.operationalinsights/workspaces"
+                        },
+                        "name": "parameters - 1"
+                    },
+                    {
+                        "type": 3,
+                        "content": {
+                            "version": "KqlItem/1.0",
+                            "query": "AzureActivity\r\n| extend Subscription=strcat('/subscriptions/',SubscriptionId)\r\n| where Subscription in~ ({Subscription})\r\n| where ResourceGroup in~ ({ResourceGroup})\r\n| where CategoryValue == 'Administrative'\r\n| where ResourceProviderValue =~ 'microsoft.network'\r\n| where _ResourceId contains \"networkSecurityGroups\"\r\n| summarize arg_max(TimeGenerated, *) by CorrelationId\r\n| extend NSG = split(_ResourceId,'/')[8]\r\n| summarize count() by NSG=tostring(NSG)\r\n",
+                            "size": 1,
+                            "title": "Activity by NSG",
+                            "timeContext": {
+                                "durationMs": 172800000
+                            },
+                            "timeContextFromParameter": "TimeRange",
+                            "exportFieldName": "NSG",
+                            "exportParameterName": "selectedNSG",
+                            "exportDefaultValue": "All",
+                            "queryType": 0,
+                            "resourceType": "microsoft.operationalinsights/workspaces",
+                            "crossComponentResources": [
+                                "{Workspace}"
+                            ],
+                            "visualization": "table"
+                        },
+                        "customWidth": "25",
+                        "name": "query - 2"
+                    },
+                    {
+                        "type": 3,
+                        "content": {
+                            "version": "KqlItem/1.0",
+                            "query": "AzureActivity\r\n| extend Subscription=strcat('/subscriptions/',SubscriptionId)\r\n| where Subscription in~ ({Subscription})\r\n| where ResourceGroup in~ ({ResourceGroup})\r\n| where CategoryValue == 'Administrative'\r\n| where ResourceProviderValue =~ 'microsoft.network'\r\n| where _ResourceId contains \"networkSecurityGroups\"\r\n| summarize arg_max(TimeGenerated, *) by CorrelationId\r\n| extend NSG = split(_ResourceId,'/')[8]\r\n| extend Operation=tolower(tostring(split(OperationNameValue,'/')[-1]))\r\n| summarize count() by Operation\r\n",
+                            "size": 1,
+                            "title": "Activity by Operation",
+                            "timeContext": {
+                                "durationMs": 172800000
+                            },
+                            "timeContextFromParameter": "TimeRange",
+                            "exportFieldName": "Operation",
+                            "exportParameterName": "selectedOperation",
+                            "exportDefaultValue": "All",
+                            "queryType": 0,
+                            "resourceType": "microsoft.operationalinsights/workspaces",
+                            "crossComponentResources": [
+                                "{Workspace}"
+                            ],
+                            "visualization": "table"
+                        },
+                        "customWidth": "25",
+                        "name": "query - 2 - Copy"
+                    },
+                    {
+                        "type": 3,
+                        "content": {
+                            "version": "KqlItem/1.0",
+                            "query": "AzureActivity\r\n| extend Subscription=strcat('/subscriptions/',SubscriptionId)\r\n| where Subscription in~ ({Subscription})\r\n| where ResourceGroup in~ ({ResourceGroup})\r\n| where CategoryValue == 'Administrative'\r\n| where ResourceProviderValue =~ 'microsoft.network'\r\n| where _ResourceId contains \"networkSecurityGroups\"\r\n| summarize arg_max(TimeGenerated, *) by CorrelationId\r\n| extend NSG = split(_ResourceId,'/')[8]\r\n| extend Operation=tolower(tostring(split(OperationNameValue,'/')[-1]))\r\n| where NSG =~ \"{selectedNSG}\" or 'All' =~ '{selectedNSG}'\r\n| where Operation =~ \"{selectedOperation}\" or 'All' =~ '{selectedOperation}'\r\n| summarize count() by Caller\r\n",
+                            "size": 1,
+                            "title": "Activity by User",
+                            "timeContext": {
+                                "durationMs": 172800000
+                            },
+                            "timeContextFromParameter": "TimeRange",
+                            "exportFieldName": "Caller",
+                            "exportParameterName": "selectedCaller",
+                            "exportDefaultValue": "All",
+                            "queryType": 0,
+                            "resourceType": "microsoft.operationalinsights/workspaces",
+                            "crossComponentResources": [
+                                "{Workspace}"
+                            ],
+                            "visualization": "table"
+                        },
+                        "customWidth": "25",
+                        "name": "query - 2 - Copy - Copy"
+                    },
+                    {
+                        "type": 3,
+                        "content": {
+                            "version": "KqlItem/1.0",
+                            "query": "AzureActivity\r\n| extend Subscription=strcat('/subscriptions/',SubscriptionId)\r\n| where Subscription in~ ({Subscription})\r\n| where ResourceGroup in~ ({ResourceGroup})\r\n| where CategoryValue == 'Administrative'\r\n| where ResourceProviderValue =~ 'microsoft.network'\r\n| where _ResourceId contains \"networkSecurityGroups\"\r\n| summarize arg_max(TimeGenerated, *) by CorrelationId\r\n| extend NSG = split(_ResourceId,'/')[8]\r\n| extend Operation=tolower(tostring(split(OperationNameValue,'/')[-1]))\r\n| extend Rule=strcat(tostring(NSG),'-',split(todynamic(Properties).entity,'/')[-1])\r\n| where NSG =~ \"{selectedNSG}\" or 'All' =~ '{selectedNSG}'\r\n| where Operation =~ \"{selectedOperation}\" or 'All' =~ '{selectedOperation}'\r\n| where Caller =~ \"{selectedCaller}\" or 'All' =~ '{selectedCaller}'\r\n| summarize count() by Rule\r\n",
+                            "size": 1,
+                            "title": "Activity by NSG-Rule",
+                            "timeContext": {
+                                "durationMs": 172800000
+                            },
+                            "timeContextFromParameter": "TimeRange",
+                            "exportFieldName": "Rule",
+                            "exportParameterName": "selectedRule",
+                            "exportDefaultValue": "All",
+                            "queryType": 0,
+                            "resourceType": "microsoft.operationalinsights/workspaces",
+                            "crossComponentResources": [
+                                "{Workspace}"
+                            ],
+                            "visualization": "table"
+                        },
+                        "customWidth": "25",
+                        "name": "query - 2 - Copy - Copy - Copy"
+                    },
+                    {
+                        "type": 3,
+                        "content": {
+                            "version": "KqlItem/1.0",
+                            "query": "AzureActivity\r\n| extend Subscription=strcat('/subscriptions/',SubscriptionId)\r\n| where Subscription in~ ({Subscription})\r\n| where ResourceGroup in~ ({ResourceGroup})\r\n| where CategoryValue == 'Administrative'\r\n| where ResourceProviderValue =~ 'microsoft.network'\r\n| where _ResourceId contains \"networkSecurityGroups\"\r\n| summarize arg_min(TimeGenerated, *) by CorrelationId\r\n| join kind=leftouter (AzureActivity\r\n| where CategoryValue == 'Administrative'\r\n| where ResourceProviderValue =~ 'microsoft.network'\r\n| where _ResourceId contains \"networkSecurityGroups\"\r\n//| extend Name = todynamic(iff(todynamic(RequestBody).name == '', 'mani', todynamic(RequestBody).name))\r\n| summarize arg_max(TimeGenerated, *) by CorrelationId) on CorrelationId\r\n| extend NSG = split(_ResourceId,'/')[8]\r\n| extend Resource = split(todynamic(Properties).entity,'/')[-1]\r\n| extend Rule=strcat(tostring(NSG),'-',split(todynamic(Properties).entity,'/')[-1])\r\n| where NSG in~ ({NSG})\r\n| where tostring(NSG) =~ \"{selectedNSG}\" or 'All' =~ '{selectedNSG}'\r\n| extend Operation=tolower(tostring(split(OperationNameValue,'/')[-1]))\r\n| where Operation =~ \"{selectedOperation}\" or 'All' == '{selectedOperation}'\r\n| where Caller =~ \"{selectedCaller}\" or 'All' == '{selectedCaller}'\r\n| where Rule =~ \"{selectedRule}\" or 'All' == '{selectedRule}'\r\n| extend RequestBody=todynamic(Properties)\r\n| extend RequestBody=dynamic_to_json(RequestBody.requestbody)\r\n//|extend Name = todynamic(RequestBody.name)\r\n//| extend Name = todynamic(iff(todynamic(RequestBody).name == '', 'mani', todynamic(RequestBody).name))\r\n| project TimeGenerated, NSG, Resource, ResourceGroup, \r\nOperation=case(\r\ntodynamic(Properties).message == 'Microsoft.Network/networkSecurityGroups/write', 'NSG-create',\r\ntodynamic(Properties).message == 'Microsoft.Network/networkSecurityGroups/delete', 'NSG-delete',\r\nRequestBody contains '{\"properties\":','Rule-create',\r\nstrcat('Rule-',tolower(tostring(split(OperationNameValue,'/')[-1])))\r\n),\r\nCaller, CallerIpAddress, \r\nMessage=todynamic(Properties).message, ActivityStatusValue,\r\nResult= ActivityStatusValue1,\r\nRequestBody,\r\nResourceId=tolower(_ResourceId), \r\nSourcePortRange = strcat(parse_json(RequestBody).properties.sourcePortRange, parse_json(RequestBody).properties.sourcePortRanges), \r\nSourceAddressPrefix = strcat(parse_json(RequestBody).properties.sourceAddressPrefix,parse_json(RequestBody).properties.sourceAddressPrefixes),\r\nDestinationPortRange = strcat(parse_json(RequestBody).properties.destinationPortRange,parse_json(RequestBody).properties.destinationPortRanges),DestinationAddressPrefix = strcat(todynamic(RequestBody).properties.destinationAddressPrefix, todynamic(RequestBody).properties.destinationAddressPrefixes), \r\nAccess = parse_json(RequestBody).properties.access, \r\nPriority = parse_json(RequestBody).properties.priority, \r\nDirection = parse_json(RequestBody).properties.direction\r\n| order by TimeGenerated desc",
+                            "size": 0,
+                            "showAnalytics": true,
+                            "title": "NSG Changes",
+                            "timeContext": {
+                                "durationMs": 0
+                            },
+                            "timeContextFromParameter": "TimeRange",
+                            "exportedParameters": [
+                                {
+                                    "fieldName": "NSG",
+                                    "parameterName": "targetedNSG",
+                                    "parameterType": 5
+                                }
+                            ],
+                            "showExportToExcel": true,
+                            "queryType": 0,
+                            "resourceType": "microsoft.operationalinsights/workspaces",
+                            "crossComponentResources": [
+                                "{Workspace}"
+                            ],
+                            "gridSettings": {
+                                "sortBy": [
+                                    {
+                                        "itemKey": "TimeGenerated",
+                                        "sortOrder": 1
+                                    }
+                                ]
+                            },
+                            "sortBy": [
+                                {
+                                    "itemKey": "TimeGenerated",
+                                    "sortOrder": 1
+                                }
+                            ]
+                        },
+                        "name": "LogData"
+                    },
+                    {
+                        "type": 3,
+                        "content": {
+                            "version": "KqlItem/1.0",
+                            "query": "resources\r\n| where type =~ 'microsoft.network/networksecuritygroups'\r\n| where name =~ '{targetedNSG}'\r\n| project resourceId=tolower(id),name,Subnets=properties.subnets,NetworkInterfaces=properties.networkInterfaces",
+                            "size": 1,
+                            "title": "NSG Connected NIC/Subnets",
+                            "noDataMessage": "NSG no longer exists",
+                            "queryType": 1,
+                            "resourceType": "microsoft.resourcegraph/resources",
+                            "crossComponentResources": [
+                                "value::all"
+                            ]
+                        },
+                        "conditionalVisibility": {
+                            "parameterName": "targetedNSG",
+                            "comparison": "isNotEqualTo"
+                        },
+                        "name": "resourceGraphData"
+                    },
+                    {
+                        "type": 3,
+                        "content": {
+                            "version": "KqlItem/1.0",
+                            "query": "AzureActivity\r\n| where TimeGenerated >= ago(90d)\r\n| summarize arg_min(TimeGenerated, *) by CorrelationId\r\n| extend NSG = split(_ResourceId,'/')[8]\r\n| extend Resource = split(todynamic(Properties).entity,'/')[-1]\r\n| where NSG =~ '{targetedNSG}'\r\n| extend RequestBody=todynamic(Properties)\r\n| join kind=leftouter (AzureActivity\r\n| where CategoryValue == 'Administrative'\r\n| where ResourceProviderValue =~ 'microsoft.network'\r\n| where _ResourceId contains \"networkSecurityGroups\"\r\n| summarize arg_max(TimeGenerated, *) by CorrelationId) on CorrelationId\r\n//| where ActivityStatusValue == 'Started'\r\n| extend RequestBody=todynamic(Properties)\r\n| extend RequestBody=dynamic_to_json(RequestBody.requestbody) \r\n| extend DestinationAddressPrefix = strcat(todynamic(RequestBody).properties.destinationAddressPrefix, todynamic(RequestBody).properties.destinationAddressPrefixes)\r\n//| extend prevDestIPAddr = prev(DestinationAddressPrefix)\r\n//| extend diff = DestinationAddressPrefix - prevDestIPAddr\r\n//| extend diffactivity = prev(ActivityStatusValue)\r\n//| extend diff2 = ActivityStatusValue - diffActivity\r\n| extend Operation=case(\r\ntodynamic(Properties).message == 'Microsoft.Network/networkSecurityGroups/write', 'NSG-create',\r\ntodynamic(Properties).message == 'Microsoft.Network/networkSecurityGroups/delete', 'NSG-delete',\r\niff(RequestBody contains '{\"properties\":','Rule-create',strcat('Rule-',tolower(tostring(split(OperationNameValue,'/')[-1]))))\r\n)\r\n| project TimeGenerated,NSG, Resource,ResourceGroup, \r\nOperation, \r\nCaller, CallerIpAddress, \r\nActivityStatusValue, RequestBody,\r\nResourceId=tolower(_ResourceId), \r\nSourcePortRange = strcat(parse_json(RequestBody).properties.sourcePortRange, parse_json(RequestBody).properties.sourcePortRanges), \r\nSourceAddressPrefix = strcat(parse_json(RequestBody).properties.sourceAddressPrefix,parse_json(RequestBody).properties.sourceAddressPrefixes),\r\nDestinationPortRange = strcat(parse_json(RequestBody).properties.destinationPortRange,parse_json(RequestBody).properties.destinationPortRanges),\r\nDestinationAddressPrefix = strcat(parse_json(RequestBody).properties.destinationAddressPrefix,parse_json(RequestBody).properties.destinationAddressPrefixes),\r\nAccess = parse_json(RequestBody).properties.access, \r\nPriority = parse_json(RequestBody).properties.priority, \r\nDirection = parse_json(RequestBody).properties.direction,\r\nResult= ActivityStatusValue1,\r\nMessage=todynamic(Properties).message\r\n| extend Resource=tostring(Resource)\r\n| order by Resource,TimeGenerated asc\r\n| project TimeGenerated,NSG,Resource,Operation, Caller,\r\nSourcePortChange=iif(Resource==prev(Resource),iif(SourcePortRange==prev(SourcePortRange),'N','Y'),'na'),SourcePortRange,\r\nSourceAddressChange=iif(Resource==prev(Resource),iif(SourceAddressPrefix==prev(SourceAddressPrefix),'N','Y'),'na'),SourceAddressPrefix,\r\nDestPortChange=iif(Resource==prev(Resource),iif(DestinationPortRange==prev(DestinationPortRange),'N','Y'),'na'),DestinationPortRange, \r\nDestAddressChange=iif(Resource==prev(Resource),iif(DestinationAddressPrefix==prev(DestinationAddressPrefix),'N','Y'),'na'),DestinationAddressPrefix,\r\nAccessChange=iif(Resource==prev(Resource),iif(tostring(Access)==tostring(prev(Access)),'N','Y'),'na'),Access,\r\nPriorityChange=iif(Resource==prev(Resource),iif(tostring(Priority)==tostring(prev(Priority)),'N','Y'),'na'),Priority, \r\nDirectionChange=iif(Resource==prev(Resource),iif(tostring(Direction)==tostring(prev(Direction)),'N','Y'),'na'),Direction ",
+                            "size": 0,
+                            "title": "Change History",
+                            "showExportToExcel": true,
+                            "queryType": 0,
+                            "resourceType": "microsoft.operationalinsights/workspaces",
+                            "crossComponentResources": [
+                                "{Workspace}"
+                            ],
+                            "gridSettings": {
+                                "formatters": [
+                                    {
+                                        "columnMatch": "SourcePortChange",
+                                        "formatter": 18,
+                                        "formatOptions": {
+                                            "thresholdsOptions": "icons",
+                                            "thresholdsGrid": [
+                                                {
+                                                    "operator": "==",
+                                                    "thresholdValue": "Y",
+                                                    "representation": "3",
+                                                    "text": "{0}{1}"
+                                                },
+                                                {
+                                                    "operator": "==",
+                                                    "thresholdValue": "N",
+                                                    "representation": "success",
+                                                    "text": "{0}{1}"
+                                                },
+                                                {
+                                                    "operator": "Default",
+                                                    "thresholdValue": null,
+                                                    "representation": "more",
+                                                    "text": "{0}{1}"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "columnMatch": "SourceAddressChange",
+                                        "formatter": 18,
+                                        "formatOptions": {
+                                            "thresholdsOptions": "icons",
+                                            "thresholdsGrid": [
+                                                {
+                                                    "operator": "==",
+                                                    "thresholdValue": "Y",
+                                                    "representation": "3",
+                                                    "text": "{0}{1}"
+                                                },
+                                                {
+                                                    "operator": "==",
+                                                    "thresholdValue": "N",
+                                                    "representation": "success",
+                                                    "text": "{0}{1}"
+                                                },
+                                                {
+                                                    "operator": "Default",
+                                                    "thresholdValue": null,
+                                                    "representation": "more",
+                                                    "text": "{0}{1}"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "columnMatch": "DestPortChange",
+                                        "formatter": 18,
+                                        "formatOptions": {
+                                            "thresholdsOptions": "icons",
+                                            "thresholdsGrid": [
+                                                {
+                                                    "operator": "==",
+                                                    "thresholdValue": "Y",
+                                                    "representation": "3",
+                                                    "text": "{0}{1}"
+                                                },
+                                                {
+                                                    "operator": "==",
+                                                    "thresholdValue": "N",
+                                                    "representation": "success",
+                                                    "text": "{0}{1}"
+                                                },
+                                                {
+                                                    "operator": "Default",
+                                                    "thresholdValue": null,
+                                                    "representation": "more",
+                                                    "text": "{0}{1}"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "columnMatch": "DestAddressChange",
+                                        "formatter": 18,
+                                        "formatOptions": {
+                                            "thresholdsOptions": "icons",
+                                            "thresholdsGrid": [
+                                                {
+                                                    "operator": "==",
+                                                    "thresholdValue": "Y",
+                                                    "representation": "3",
+                                                    "text": "{0}{1}"
+                                                },
+                                                {
+                                                    "operator": "==",
+                                                    "thresholdValue": "N",
+                                                    "representation": "success",
+                                                    "text": "{0}{1}"
+                                                },
+                                                {
+                                                    "operator": "Default",
+                                                    "thresholdValue": null,
+                                                    "representation": "more",
+                                                    "text": "{0}{1}"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "columnMatch": "AccessChange",
+                                        "formatter": 18,
+                                        "formatOptions": {
+                                            "thresholdsOptions": "icons",
+                                            "thresholdsGrid": [
+                                                {
+                                                    "operator": "==",
+                                                    "thresholdValue": "Y",
+                                                    "representation": "3",
+                                                    "text": "{0}{1}"
+                                                },
+                                                {
+                                                    "operator": "==",
+                                                    "thresholdValue": "N",
+                                                    "representation": "success",
+                                                    "text": "{0}{1}"
+                                                },
+                                                {
+                                                    "operator": "Default",
+                                                    "thresholdValue": null,
+                                                    "representation": "more",
+                                                    "text": "{0}{1}"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "columnMatch": "PriorityChange",
+                                        "formatter": 18,
+                                        "formatOptions": {
+                                            "thresholdsOptions": "icons",
+                                            "thresholdsGrid": [
+                                                {
+                                                    "operator": "==",
+                                                    "thresholdValue": "Y",
+                                                    "representation": "3",
+                                                    "text": "{0}{1}"
+                                                },
+                                                {
+                                                    "operator": "==",
+                                                    "thresholdValue": "N",
+                                                    "representation": "success",
+                                                    "text": "{0}{1}"
+                                                },
+                                                {
+                                                    "operator": "Default",
+                                                    "thresholdValue": null,
+                                                    "representation": "more",
+                                                    "text": "{0}{1}"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "columnMatch": "DirectionChange",
+                                        "formatter": 18,
+                                        "formatOptions": {
+                                            "thresholdsOptions": "icons",
+                                            "thresholdsGrid": [
+                                                {
+                                                    "operator": "==",
+                                                    "thresholdValue": "Y",
+                                                    "representation": "3",
+                                                    "text": "{0}{1}"
+                                                },
+                                                {
+                                                    "operator": "==",
+                                                    "thresholdValue": "N",
+                                                    "representation": "success",
+                                                    "text": "{0}{1}"
+                                                },
+                                                {
+                                                    "operator": "Default",
+                                                    "thresholdValue": null,
+                                                    "representation": "more",
+                                                    "text": "{0}{1}"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ],
+                                "sortBy": [
+                                    {
+                                        "itemKey": "TimeGenerated",
+                                        "sortOrder": 2
+                                    }
+                                ]
+                            },
+                            "sortBy": [
+                                {
+                                    "itemKey": "TimeGenerated",
+                                    "sortOrder": 2
+                                }
+                            ]
+                        },
+                        "conditionalVisibility": {
+                            "parameterName": "targetedNSG",
+                            "comparison": "isNotEqualTo"
+                        },
+                        "name": "query - 7"
+                    }
+                ]
+            },
+            "name": "AuditChange"
+        }
+    ],
+    "fallbackResourceIds": [
+        "Azure Monitor"
+    ],
+    "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
+}
