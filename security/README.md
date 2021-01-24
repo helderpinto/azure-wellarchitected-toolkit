@@ -52,8 +52,8 @@ The questions and initiatives below are based on the [Security pillar of the Wel
 
 ### Incorporate security in release engineering procedures
 
-* AzSK
-* Pen testing
+* Leverage the [Secure DevOps Kit for Azure](https://azsk.azurewebsites.net/), by bringing security verification tests and security assurance to your Azure services release pipelines and improving overall security posture, detecting security configuration drifts and providing visibility over your progresses in security management.
+* Perform regular Penetration Testing for simulating attacks to your Azure services. But review before [Microsoft's guidance on the subject](https://technet.microsoft.com/mt784683).
 
 ## Tools
 

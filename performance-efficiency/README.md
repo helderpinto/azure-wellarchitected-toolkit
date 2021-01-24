@@ -29,3 +29,7 @@ TODO: detail initiatives
 * Prepare for large scale events, together with business and marketing teams
 * Optimize database queries
 * Implement overall monitoring strategy for scalability
+
+To review
+https://docs.microsoft.com/en-us/azure/architecture/framework/scalability/design-checklist
+https://docs.microsoft.com/en-us/azure/architecture/framework/scalability/test-checklist
