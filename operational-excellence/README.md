@@ -47,3 +47,17 @@ TODO: detail initiatives
     * Test plans with Azure DevOps
     * Blue/green deployments, canary releases, A/B testing
     * Stress tests, business continuity drills, fault injection
+
+## Tools
+
+ARG query for checking which resources are being used
+
+resources
+| join kind=inner (
+    resourcecontainers
+    | where type == 'microsoft.resources/subscriptions'
+    | project subscriptionName = name, subscriptionId
+) on subscriptionId
+| project-away subscriptionId1
+| summarize count() by subscriptionName, type
+| order by type, subscriptionName
