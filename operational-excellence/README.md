@@ -61,3 +61,5 @@ resources
 | project-away subscriptionId1
 | summarize count() by subscriptionName, type
 | order by type, subscriptionName
+
+https://github.com/scautomation/Azure-Inventory-Workbook
