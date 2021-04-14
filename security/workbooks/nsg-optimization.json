@@ -1,0 +1,348 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 9,
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "parameters": [
+          {
+            "id": "e09a61a1-e398-4ea0-a09c-0c4fbeb3aac3",
+            "version": "KqlParameterItem/1.0",
+            "name": "LAWorkspaces",
+            "label": "Traffic Analytics Workspaces",
+            "type": 5,
+            "isRequired": true,
+            "multiSelect": true,
+            "quote": "'",
+            "delimiter": ",",
+            "query": "resources\r\n| where type =~ 'microsoft.operationalinsights/workspaces'\r\n| project id",
+            "crossComponentResources": [
+              "value::all"
+            ],
+            "value": [
+              "value::all"
+            ],
+            "typeSettings": {
+              "additionalResourceOptions": [
+                "value::all"
+              ]
+            },
+            "queryType": 1,
+            "resourceType": "microsoft.resourcegraph/resources"
+          },
+          {
+            "id": "6838a8d2-5418-4944-93e0-e6efc659a7fe",
+            "version": "KqlParameterItem/1.0",
+            "name": "FlowLogsActivityRange",
+            "label": "NSG Activity Range",
+            "type": 4,
+            "isRequired": true,
+            "value": {
+              "durationMs": 86400000
+            },
+            "typeSettings": {
+              "selectableValues": [
+                {
+                  "durationMs": 86400000
+                },
+                {
+                  "durationMs": 172800000
+                },
+                {
+                  "durationMs": 259200000
+                },
+                {
+                  "durationMs": 604800000
+                },
+                {
+                  "durationMs": 1209600000
+                },
+                {
+                  "durationMs": 2592000000
+                }
+              ],
+              "allowCustom": true
+            }
+          },
+          {
+            "id": "cbf1fbe1-719c-497a-a706-7b05b7958f7c",
+            "version": "KqlParameterItem/1.0",
+            "name": "Debug",
+            "type": 1,
+            "value": "false",
+            "isHiddenWhenLocked": true,
+            "timeContext": {
+              "durationMs": 0
+            },
+            "timeContextFromParameter": "OverallTimeRange"
+          }
+        ],
+        "style": "above",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces"
+      },
+      "name": "ScopeParameters"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "resources \r\n| where type =~ 'microsoft.network/networksecuritygroups'\r\n| extend NSGId = tolower(id)\r\n| join kind = leftouter (\r\n    resources \r\n    | where type =~ 'microsoft.network/networkwatchers/flowlogs'\r\n\t| extend trafficAnalyticsEnabledField = tostring(properties.flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.enabled)\r\n    | project NSGId = tolower(properties.targetResourceId), trafficAnalyticsEnabledField\r\n) on NSGId\r\n| extend trafficAnalyticsEnabled = iif((isnotempty(trafficAnalyticsEnabledField) and isnotnull(trafficAnalyticsEnabledField)), trafficAnalyticsEnabledField, 'false')\r\n| where trafficAnalyticsEnabled == 'true'\r\n| distinct NSGId\r\n| order by NSGId asc\r\n",
+        "size": 4,
+        "title": "NSGs with Traffic Analytics enabled",
+        "queryType": 1,
+        "resourceType": "microsoft.resourcegraph/resources",
+        "crossComponentResources": [
+          "value::all"
+        ],
+        "gridSettings": {
+          "rowLimit": 1000
+        }
+      },
+      "conditionalVisibility": {
+        "parameterName": "Debug",
+        "comparison": "isEqualTo",
+        "value": "true"
+      },
+      "customWidth": "50",
+      "name": "TrafficAnalyticsEnabledNSGs"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AzureNetworkAnalytics_CL\r\n| where SubType_s == \"FlowLog\" and TimeGenerated > datetime('{FlowLogsActivityRange:startISO}')\r\n| extend NSGId = tolower(NSGList_s)\r\n| extend FlowCount = AllowedInFlows_d + DeniedInFlows_d + AllowedOutFlows_d + DeniedOutFlows_d\r\n| summarize NSGFlowCount = sum(FlowCount) by NSGId\r\n| where NSGFlowCount > 0\r\n| project NSGId = strcat('/subscriptions/', split(NSGId, \"/\")[0], '/resourceGroups/', split(NSGId, \"/\")[1], '/providers/Microsoft.Network/networkSecurityGroups/', split(NSGId, \"/\")[2])\r\n| order by NSGId asc",
+        "size": 4,
+        "title": "NSGs with Flow Logs",
+        "timeContext": {
+          "durationMs": 86400000
+        },
+        "timeContextFromParameter": "FlowLogsActivityRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{LAWorkspaces}"
+        ]
+      },
+      "conditionalVisibility": {
+        "parameterName": "Debug",
+        "comparison": "isEqualTo",
+        "value": "true"
+      },
+      "customWidth": "50",
+      "name": "nsgsWithFlowLogs"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "resources \r\n| where type =~ 'microsoft.network/networksecuritygroups'\r\n| extend NSGId = tolower(id)\r\n| join kind = leftouter (\r\n    resources \r\n    | where type =~ 'microsoft.network/networkwatchers/flowlogs'\r\n\t| extend trafficAnalyticsEnabledField = tostring(properties.flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.enabled)\r\n    | project NSGId = tolower(properties.targetResourceId), trafficAnalyticsEnabledField\r\n) on NSGId\r\n| extend trafficAnalyticsEnabled = iif((isnotempty(trafficAnalyticsEnabledField) and isnotnull(trafficAnalyticsEnabledField)), trafficAnalyticsEnabledField, 'false')\r\n| summarize count() by trafficAnalyticsEnabled\r\n",
+        "size": 1,
+        "title": "NSGs and Traffic Analytics state",
+        "queryType": 1,
+        "resourceType": "microsoft.resourcegraph/resources",
+        "crossComponentResources": [
+          "value::all"
+        ],
+        "visualization": "piechart",
+        "chartSettings": {
+          "seriesLabelSettings": [
+            {
+              "seriesName": "false",
+              "label": "Disabled",
+              "color": "redBright"
+            },
+            {
+              "seriesName": "true",
+              "label": "Enabled",
+              "color": "green"
+            }
+          ]
+        }
+      },
+      "customWidth": "50",
+      "showPin": true,
+      "name": "NSGsTrafficAnalyticsState"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "resources \r\n| where type =~ 'microsoft.network/networksecuritygroups'\r\n| extend NSGId = tolower(id)\r\n| join kind = leftouter (\r\n    resources \r\n    | where type =~ 'microsoft.network/networkwatchers/flowlogs'\r\n\t| extend trafficAnalyticsEnabledField = tostring(properties.flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.enabled)\r\n    | project NSGId = tolower(properties.targetResourceId), trafficAnalyticsEnabledField\r\n) on NSGId\r\n| extend trafficAnalyticsEnabled = iif((isnotempty(trafficAnalyticsEnabledField) and isnotnull(trafficAnalyticsEnabledField)), trafficAnalyticsEnabledField, 'false')\r\n| where trafficAnalyticsEnabled == 'false'\r\n| project NSGId\r\n| order by NSGId",
+        "size": 4,
+        "title": "NSGs without Traffic Analytics enabled",
+        "queryType": 1,
+        "resourceType": "microsoft.resourcegraph/resources",
+        "visualization": "table",
+        "gridSettings": {
+          "rowLimit": 1000,
+          "filter": true
+        },
+        "chartSettings": {
+          "seriesLabelSettings": [
+            {
+              "seriesName": "false",
+              "label": "Disabled",
+              "color": "redBright"
+            },
+            {
+              "seriesName": "true",
+              "label": "Enabled",
+              "color": "green"
+            }
+          ]
+        }
+      },
+      "customWidth": "50",
+      "name": "NSGsTrafficAnalyticsDisabled"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "{\"version\":\"Merge/1.0\",\"merges\":[{\"id\":\"a8ce7d86-78b3-4a76-84be-fa6135893051\",\"mergeType\":\"leftanti\",\"leftTable\":\"TrafficAnalyticsEnabledNSGs\",\"rightTable\":\"nsgsWithFlowLogs\",\"leftColumn\":\"NSGId\",\"rightColumn\":\"NSGId\"}],\"projectRename\":[{\"originalName\":\"[TrafficAnalyticsEnabledNSGs].NSGId\",\"mergedName\":\"NSGId\",\"fromId\":\"a8ce7d86-78b3-4a76-84be-fa6135893051\"}]}",
+        "size": 1,
+        "title": "Inactive NSGs",
+        "queryType": 7
+      },
+      "customWidth": "50",
+      "name": "nsgsWithoutFlowLogs"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "resources \r\n| where type =~ 'microsoft.network/networksecuritygroups'\r\n| extend NSGId = tolower(id)\r\n| join kind = leftouter (\r\n    resources \r\n    | where type =~ 'microsoft.network/networkwatchers/flowlogs'\r\n\t| extend trafficAnalyticsEnabledField = tostring(properties.flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.enabled)\r\n    | project NSGId = tolower(properties.targetResourceId), trafficAnalyticsEnabledField\r\n) on NSGId\r\n| extend trafficAnalyticsEnabled = iif((isnotempty(trafficAnalyticsEnabledField) and isnotnull(trafficAnalyticsEnabledField)), trafficAnalyticsEnabledField, 'false')\r\n| where trafficAnalyticsEnabled == 'true'\r\n| extend nsgRules = properties.securityRules\r\n| mvexpand nsgRules\r\n| project NSGId=tolower(id), ruleName=tolower(tostring(nsgRules.name)), RuleId = tolower(strcat(id,nsgRules.name)), Access = tostring(nsgRules.properties.access)\r\n| order by RuleId asc",
+        "size": 1,
+        "title": "Traffic Analytics enabled NSG rules",
+        "queryType": 1,
+        "resourceType": "microsoft.resourcegraph/resources",
+        "crossComponentResources": [
+          "value::all"
+        ],
+        "gridSettings": {
+          "rowLimit": 5000
+        }
+      },
+      "conditionalVisibility": {
+        "parameterName": "Debug",
+        "comparison": "isEqualTo",
+        "value": "True"
+      },
+      "customWidth": "50",
+      "name": "trafficAnalyticsEnabledNSGRules"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AzureNetworkAnalytics_CL\r\n| where SubType_s == \"FlowLog\" and TimeGenerated > datetime('{FlowLogsActivityRange:startISO}')\r\n| extend NSGId = strcat('/subscriptions/', split(NSGList_s, \"/\")[0], '/resourceGroups/', split(NSGList_s, \"/\")[1], '/providers/Microsoft.Network/networkSecurityGroups/', split(NSGList_s, \"/\")[2])\r\n| extend RuleName = NSGRule_s, FlowCount = AllowedInFlows_d + DeniedInFlows_d + AllowedOutFlows_d + DeniedOutFlows_d\r\n| summarize RuleFlowCount = sum(FlowCount) by NSGId, RuleName\r\n| extend RuleId = tolower(strcat(NSGId, RuleName))\r\n| order by RuleId asc",
+        "size": 1,
+        "title": "NSG Rules with Flow Logs",
+        "timeContext": {
+          "durationMs": 86400000
+        },
+        "timeContextFromParameter": "FlowLogsActivityRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{LAWorkspaces}"
+        ],
+        "gridSettings": {
+          "rowLimit": 5000
+        }
+      },
+      "conditionalVisibility": {
+        "parameterName": "Debug",
+        "comparison": "isEqualTo",
+        "value": "true"
+      },
+      "customWidth": "50",
+      "name": "rulesWithFlowLogs"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "{\"version\":\"Merge/1.0\",\"merges\":[{\"id\":\"fb6b5a2b-3391-4d64-a00c-72ad563621b6\",\"mergeType\":\"inner\",\"leftTable\":\"trafficAnalyticsEnabledNSGRules\",\"rightTable\":\"nsgsWithFlowLogs\",\"leftColumn\":\"NSGId\",\"rightColumn\":\"NSGId\"}],\"projectRename\":[{\"originalName\":\"[trafficAnalyticsEnabledNSGRules].NSGId\",\"mergedName\":\"NSGId\",\"fromId\":\"fb6b5a2b-3391-4d64-a00c-72ad563621b6\"},{\"originalName\":\"[trafficAnalyticsEnabledNSGRules].ruleName\",\"mergedName\":\"ruleName\",\"fromId\":\"fb6b5a2b-3391-4d64-a00c-72ad563621b6\"},{\"originalName\":\"[trafficAnalyticsEnabledNSGRules].RuleId\",\"mergedName\":\"RuleId\",\"fromId\":\"fb6b5a2b-3391-4d64-a00c-72ad563621b6\"},{\"originalName\":\"[trafficAnalyticsEnabledNSGRules].Access\",\"mergedName\":\"Access\",\"fromId\":\"unknown\"},{\"originalName\":\"[nsgsWithFlowLogs].NSGId\"}]}",
+        "size": 4,
+        "title": "All NSG Rules of active NSGs",
+        "exportFieldName": "NSGId",
+        "exportParameterName": "SelectedNSGId",
+        "queryType": 7,
+        "gridSettings": {
+          "formatters": [
+            {
+              "columnMatch": "RuleId",
+              "formatter": 5
+            }
+          ],
+          "labelSettings": [
+            {
+              "columnId": "NSGId",
+              "label": "NSG"
+            },
+            {
+              "columnId": "ruleName",
+              "label": "Rule name"
+            }
+          ]
+        }
+      },
+      "customWidth": "50",
+      "name": "trafficAnalyticsWithFlowLogsEnabledRules"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "{\"version\":\"Merge/1.0\",\"merges\":[{\"id\":\"6ce87973-1afc-415a-a299-907fb988b03a\",\"mergeType\":\"leftanti\",\"leftTable\":\"trafficAnalyticsWithFlowLogsEnabledRules\",\"rightTable\":\"rulesWithFlowLogs\",\"leftColumn\":\"RuleId\",\"rightColumn\":\"RuleId\"}],\"projectRename\":[{\"originalName\":\"[trafficAnalyticsWithFlowLogsEnabledRules].NSGId\",\"mergedName\":\"NSGId\",\"fromId\":\"unknown\"},{\"originalName\":\"[trafficAnalyticsWithFlowLogsEnabledRules].ruleName\",\"mergedName\":\"ruleName\",\"fromId\":\"6ce87973-1afc-415a-a299-907fb988b03a\"},{\"originalName\":\"[trafficAnalyticsWithFlowLogsEnabledRules].Access\",\"mergedName\":\"Access\",\"fromId\":\"unknown\"},{\"originalName\":\"[trafficAnalyticsEnabledNSGRules].RuleId\"},{\"originalName\":\"[trafficAnalyticsWithFlowLogsEnabledRules].RuleId\"},{\"originalName\":\"[nsgsWithFlowLogs].NSGId\"}]}",
+        "size": 1,
+        "title": "Inactive rules in active NSGs (select rule for more details)",
+        "exportFieldName": "NSGId",
+        "exportParameterName": "SelectedNSGId",
+        "queryType": 7,
+        "gridSettings": {
+          "formatters": [
+            {
+              "columnMatch": "ruleName",
+              "formatter": 1
+            }
+          ],
+          "rowLimit": 5000,
+          "filter": true,
+          "labelSettings": [
+            {
+              "columnId": "ruleName",
+              "label": "Rule name"
+            }
+          ]
+        }
+      },
+      "customWidth": "50",
+      "name": "nsgRulesWithoutFlowLogs"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AzureNetworkAnalytics_CL\r\n| where SubType_s == \"FlowLog\" and TimeGenerated > datetime('{FlowLogsActivityRange:startISO}')\r\n| extend NSGId = strcat('/subscriptions/', split(NSGList_s, \"/\")[0], '/resourceGroups/', split(NSGList_s, \"/\")[1], '/providers/Microsoft.Network/networkSecurityGroups/', split(NSGList_s, \"/\")[2])\r\n| where NSGId =~ '{SelectedNSGId}'\r\n| extend RuleName = NSGRule_s, FlowCount = AllowedInFlows_d + DeniedInFlows_d + AllowedOutFlows_d + DeniedOutFlows_d\r\n| extend Access = iif(FlowStatus_s == 'D', 'Deny', 'Allow')\r\n| summarize RuleFlowCount = sum(FlowCount) by NSGId, RuleName, Access\r\n| order by RuleFlowCount desc",
+        "size": 1,
+        "title": "Flow Logs for active rules in selected active NSG",
+        "timeContext": {
+          "durationMs": 86400000
+        },
+        "timeContextFromParameter": "FlowLogsActivityRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{LAWorkspaces}"
+        ]
+      },
+      "customWidth": "50",
+      "name": "nsgRulesFlowLogs"
+    }
+  ],
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
+}
