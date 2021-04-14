@@ -61,7 +61,7 @@ The questions and initiatives below are based on the [Security pillar of the Wel
 * AzGovViz
 * Other assessment tools
 * NSG Changes workbook (original from [Brad Watts](https://github.com/bwatts64/AzureMonitor/blob/master/Workbooks/NSGWorkbook.json))
-* [NSG rules without activity](https://github.com/microsoft/AzureMonitorCommunity/tree/master/Azure%20Services/Network%20Watcher/Workbooks/Traffic%20Analytics)
+* [NSG Optimization - spotting rules without activity](workbooks/nsg-optimization.json)
 * [Secure Score Over Time](https://techcommunity.microsoft.com/t5/azure-security-center/secure-score-over-time-power-bi-dashboard/ba-p/1799954)
 * [Update Management Summary Workbook](https://github.com/scautomation/Azure-Automation-Update-Management-Workbooks)
 * [Azure Security Center Enterprise Onboarding Guide](https://github.com/Azure/Azure-Security-Center/tree/onboarding/Onboarding)
