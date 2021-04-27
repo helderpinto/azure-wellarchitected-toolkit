@@ -3,10 +3,7 @@ param(
     [string] $TenantId,
 
     [Parameter(Mandatory = $false)]
-    [string] $CloudEnvironment = "AzureCloud",
-
-    [Parameter(Mandatory = $false)]
-    [switch] $UseAutomation
+    [string] $CloudEnvironment = "AzureCloud"
 )
 
 <#
@@ -18,35 +15,25 @@ This script requires the following modules:
 
 Use Install-Module <module name> to install them if needed
 
+NOTE: this script is interactive, as it requires a user to login to the 3 different services (Azure AD, MS Online, and Azure RM)
+
 #>
 
 $ErrorActionPreference = "Stop"
 
-if ($UseAutomation)
-{
-    $ArmConn = Get-AutomationConnection -Name AzureRunAsConnection
-}
-
 Write-Output "Connecting to Azure AD..."
 
-if ($UseAutomation)
+try
 {
-    Connect-AzureAD -AzureEnvironmentName $cloudEnvironment -TenantId $ArmConn.TenantID -ApplicationId $ArmConn.ApplicationID -CertificateThumbprint $ArmConn.CertificateThumbprint
+    $tenantDetails = Get-AzureADTenantDetail
+    if ($tenantDetails.ObjectId -ne $TenantId)
+    {
+        throw "Current tenant ID is different from the one defined as parameter"
+    }
 }
-else
+catch
 {
-    try
-    {
-        $tenantDetails = Get-AzureADTenantDetail
-        if ($tenantDetails.ObjectId -ne $TenantId)
-        {
-            throw "Current tenant ID is different from the one defined as parameter"
-        }
-    }
-    catch
-    {
-        Connect-AzureAD -TenantId $TenantId        
-    }
+    Connect-AzureAD -TenantId $TenantId -AzureEnvironmentName $CloudEnvironment        
 }
 
 Write-Output "Getting all users..."
@@ -58,24 +45,17 @@ Write-Output "Found $($users.Count) Azure AD users."
 
 Write-Output "Connecting to MSOnline service..."
 
-if ($UseAutomation)
+try
 {
-    throw "Not supported yet"
+    $companyDetails = Get-MsolCompanyInformation
+    if ($companyDetails.ObjectId.Guid -ne $TenantId)
+    {
+        throw "Current tenant ID is different from the one defined as parameter"
+    }
 }
-else
+catch
 {
-    try
-    {
-        $companyDetails = Get-MsolCompanyInformation
-        if ($companyDetails.ObjectId.Guid -ne $TenantId)
-        {
-            throw "Current tenant ID is different from the one defined as parameter"
-        }
-    }
-    catch
-    {
-        Connect-MsolService -AzureEnvironment $CloudEnvironment
-    }
+    Connect-MsolService -AzureEnvironment $CloudEnvironment
 }
 
 Write-Output "Getting all users..."
@@ -87,24 +67,17 @@ Write-Output "Found $($msolUsers.Count) MS Online users."
 
 Write-Output "Connecting to Azure Resource Manager..."
 
-if ($UseAutomation)
+try
 {
-    Connect-AzAccount -ServicePrincipal -EnvironmentName $cloudEnvironment -Tenant $ArmConn.TenantID -ApplicationId $ArmConn.ApplicationID -CertificateThumbprint $ArmConn.CertificateThumbprint
+    $azContext = Get-AzContext
+    if ($azContext.Tenant.Id -ne $TenantId)
+    {
+        throw "Current tenant ID is different from the one defined as parameter"
+    }
 }
-else
+catch
 {
-    try
-    {
-        $azContext = Get-AzContext
-        if ($azContext.Tenant.Id -ne $TenantId)
-        {
-            throw "Current tenant ID is different from the one defined as parameter"
-        }
-    }
-    catch
-    {
-        Connect-AzAccount -Tenant $TenantId
-    }
+    Connect-AzAccount -Tenant $TenantId -Environment $CloudEnvironment
 }
 
 Write-Output "Getting all subscriptions..."
