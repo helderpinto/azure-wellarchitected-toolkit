@@ -216,7 +216,7 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
-        "query": "resources \r\n| where type =~ 'microsoft.network/networksecuritygroups'\r\n| extend NSGId = tolower(id)\r\n| join kind = leftouter (\r\n    resources \r\n    | where type =~ 'microsoft.network/networkwatchers/flowlogs'\r\n\t| extend trafficAnalyticsEnabledField = tostring(properties.flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.enabled)\r\n    | project NSGId = tolower(properties.targetResourceId), trafficAnalyticsEnabledField\r\n) on NSGId\r\n| extend trafficAnalyticsEnabled = iif((isnotempty(trafficAnalyticsEnabledField) and isnotnull(trafficAnalyticsEnabledField)), trafficAnalyticsEnabledField, 'false')\r\n| where trafficAnalyticsEnabled == 'true'\r\n| extend nsgRules = properties.securityRules\r\n| mvexpand nsgRules\r\n| project NSGId=tolower(id), ruleName=tolower(tostring(nsgRules.name)), RuleId = tolower(strcat(id,nsgRules.name)), Access = tostring(nsgRules.properties.access)\r\n| order by RuleId asc",
+        "query": "resources \r\n| where type =~ 'microsoft.network/networksecuritygroups'\r\n| extend NSGId = tolower(id)\r\n| join kind = leftouter (\r\n    resources \r\n    | where type =~ 'microsoft.network/networkwatchers/flowlogs'\r\n\t| extend trafficAnalyticsEnabledField = tostring(properties.flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.enabled)\r\n    | project NSGId = tolower(properties.targetResourceId), trafficAnalyticsEnabledField\r\n) on NSGId\r\n| extend trafficAnalyticsEnabled = iif((isnotempty(trafficAnalyticsEnabledField) and isnotnull(trafficAnalyticsEnabledField)), trafficAnalyticsEnabledField, 'false')\r\n| where trafficAnalyticsEnabled == 'true'\r\n| extend nsgRules = properties.securityRules\r\n| mvexpand nsgRules\r\n| project NSGId=tolower(id), ruleName=tolower(tostring(nsgRules.name)), RuleId = tolower(strcat(id,nsgRules.name)), Access = tostring(nsgRules.properties.access), Direction = tostring(nsgRules.properties.direction)\r\n| order by RuleId asc",
         "size": 1,
         "title": "Traffic Analytics enabled NSG rules",
         "queryType": 1,
@@ -300,7 +300,7 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
-        "query": "{\"version\":\"Merge/1.0\",\"merges\":[{\"id\":\"6ce87973-1afc-415a-a299-907fb988b03a\",\"mergeType\":\"leftanti\",\"leftTable\":\"trafficAnalyticsWithFlowLogsEnabledRules\",\"rightTable\":\"rulesWithFlowLogs\",\"leftColumn\":\"RuleId\",\"rightColumn\":\"RuleId\"}],\"projectRename\":[{\"originalName\":\"[trafficAnalyticsWithFlowLogsEnabledRules].NSGId\",\"mergedName\":\"NSGId\",\"fromId\":\"unknown\"},{\"originalName\":\"[trafficAnalyticsWithFlowLogsEnabledRules].ruleName\",\"mergedName\":\"ruleName\",\"fromId\":\"6ce87973-1afc-415a-a299-907fb988b03a\"},{\"originalName\":\"[trafficAnalyticsWithFlowLogsEnabledRules].Access\",\"mergedName\":\"Access\",\"fromId\":\"unknown\"},{\"originalName\":\"[trafficAnalyticsEnabledNSGRules].RuleId\"},{\"originalName\":\"[trafficAnalyticsWithFlowLogsEnabledRules].RuleId\"},{\"originalName\":\"[nsgsWithFlowLogs].NSGId\"}]}",
+        "query": "{\"version\":\"Merge/1.0\",\"merges\":[{\"id\":\"6ce87973-1afc-415a-a299-907fb988b03a\",\"mergeType\":\"leftanti\",\"leftTable\":\"trafficAnalyticsWithFlowLogsEnabledRules\",\"rightTable\":\"rulesWithFlowLogs\",\"leftColumn\":\"RuleId\",\"rightColumn\":\"RuleId\"}],\"projectRename\":[{\"originalName\":\"[trafficAnalyticsWithFlowLogsEnabledRules].NSGId\",\"mergedName\":\"NSGId\",\"fromId\":\"unknown\"},{\"originalName\":\"[trafficAnalyticsWithFlowLogsEnabledRules].ruleName\",\"mergedName\":\"ruleName\",\"fromId\":\"6ce87973-1afc-415a-a299-907fb988b03a\"},{\"originalName\":\"[trafficAnalyticsWithFlowLogsEnabledRules].Access\",\"mergedName\":\"Access\",\"fromId\":\"unknown\"},{\"originalName\":\"[trafficAnalyticsWithFlowLogsEnabledRules].Direction\",\"mergedName\":\"Direction\",\"fromId\":\"unknown\"},{\"originalName\":\"[trafficAnalyticsEnabledNSGRules].RuleId\"},{\"originalName\":\"[trafficAnalyticsWithFlowLogsEnabledRules].RuleId\"},{\"originalName\":\"[nsgsWithFlowLogs].NSGId\"}]}",
         "size": 1,
         "title": "Inactive rules in active NSGs (select rule for more details)",
         "exportFieldName": "NSGId",
@@ -330,11 +330,11 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
-        "query": "AzureNetworkAnalytics_CL\r\n| where SubType_s == \"FlowLog\" and TimeGenerated > datetime('{FlowLogsActivityRange:startISO}')\r\n| extend NSGId = strcat('/subscriptions/', split(NSGList_s, \"/\")[0], '/resourceGroups/', split(NSGList_s, \"/\")[1], '/providers/Microsoft.Network/networkSecurityGroups/', split(NSGList_s, \"/\")[2])\r\n| where NSGId =~ '{SelectedNSGId}'\r\n| extend RuleName = NSGRule_s, FlowCount = AllowedInFlows_d + DeniedInFlows_d + AllowedOutFlows_d + DeniedOutFlows_d\r\n| extend Access = iif(FlowStatus_s == 'D', 'Deny', 'Allow')\r\n| summarize RuleFlowCount = sum(FlowCount) by NSGId, RuleName, Access\r\n| order by RuleFlowCount desc",
+        "query": "AzureNetworkAnalytics_CL\r\n| where SubType_s == \"FlowLog\" and TimeGenerated > datetime('{FlowLogsActivityRange:startISO}')\r\n| extend NSGId = strcat('/subscriptions/', split(NSGList_s, \"/\")[0], '/resourceGroups/', split(NSGList_s, \"/\")[1], '/providers/Microsoft.Network/networkSecurityGroups/', split(NSGList_s, \"/\")[2])\r\n| where NSGId =~ '{SelectedNSGId}'\r\n| extend RuleName = NSGRule_s, FlowCount = AllowedInFlows_d + DeniedInFlows_d + AllowedOutFlows_d + DeniedOutFlows_d\r\n| extend Access = iif(FlowStatus_s == 'D', 'Deny', 'Allow')\r\n| extend Direction = iif(FlowDirection_s == 'O', 'Outbound', 'Inbound')\r\n| summarize RuleFlowCount = sum(FlowCount) by NSGId, RuleName, Access, Direction\r\n| order by Direction, RuleFlowCount desc",
         "size": 1,
         "title": "Flow Logs for active rules in selected active NSG",
         "timeContext": {
-          "durationMs": 86400000
+          "durationMs": 0
         },
         "timeContextFromParameter": "FlowLogsActivityRange",
         "queryType": 0,
