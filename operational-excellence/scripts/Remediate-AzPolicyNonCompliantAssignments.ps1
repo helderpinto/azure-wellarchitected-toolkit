@@ -6,12 +6,15 @@ param (
     [string] $ManagementGroupId,
 
     [Parameter(Mandatory = $false)]
-    [string] $SubscriptionId
+    [string] $SubscriptionId,
+
+    [Parameter(Mandatory = $false)]
+    [string] $CloudEnvironment = "AzureCloud"
 )
 
 $ErrorActionPreference = "Stop"
 
-Connect-AzAccount -Identity
+Connect-AzAccount -Identity -Environment $CloudEnvironment
 
 $assignment = Get-AzPolicyAssignment -Id $PolicyAssignmentId
 if (-not($assignment))
