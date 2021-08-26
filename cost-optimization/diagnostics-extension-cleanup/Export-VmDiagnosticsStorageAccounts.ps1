@@ -4,15 +4,21 @@ param(
 )
 
 $ctx = Get-AzContext
-
-if (-not($ctx))
-{
-    $ctx = Connect-AzAccount -Environment $Cloud
+if (-not($ctx)) {
+    Connect-AzAccount -Environment $Cloud
+    $ctx = Get-AzContext
+}
+else {
+    if ($ctx.Environment.Name -ne $Cloud) {
+        Disconnect-AzAccount -ContextName $ctx.Name
+        Connect-AzAccount -Environment $Cloud
+        $ctx = Get-AzContext
+    }
 }
 
 Write-Output "Generating the list of Storage Accounts used by the Azure Diagnostics extension (User: $($ctx.Account.Id); Tenant Id: $($ctx.Tenant.Id))"
 
-$subscriptions = Get-AzSubscription | ForEach-Object { "$($_.Id)"}
+$subscriptions = Get-AzSubscription | Where-Object { $_.State -eq "Enabled" } | ForEach-Object { "$($_.Id)"}
 
 $queryText = @"
 resources 
@@ -27,7 +33,7 @@ resources
 | summarize count() by storageAccountName, resourceGroup, subscriptionId
 "@
 
-$diagStorageAccounts = Search-AzGraph -Query $queryText -Subscription $subscriptions
+$diagStorageAccounts = (Search-AzGraph -Query $queryText -Subscription $subscriptions).data
 
 Write-Output "Found $($diagStorageAccounts.Count) storage accounts"
 

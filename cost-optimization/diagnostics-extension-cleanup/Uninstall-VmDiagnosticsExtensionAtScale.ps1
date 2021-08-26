@@ -19,10 +19,16 @@ param(
 )
 
 $ctx = Get-AzContext
-
-if (-not($ctx))
-{
-    $ctx = Connect-AzAccount -Environment $Cloud
+if (-not($ctx)) {
+    Connect-AzAccount -Environment $Cloud
+    $ctx = Get-AzContext
+}
+else {
+    if ($ctx.Environment.Name -ne $Cloud) {
+        Disconnect-AzAccount -ContextName $ctx.Name
+        Connect-AzAccount -Environment $Cloud
+        $ctx = Get-AzContext
+    }
 }
 
 Write-Output "About to remove all the Diagnostics Extensions [SIMULATE=$Simulate] from tenant $($ctx.Tenant.TenantId) ($Cloud) for subscription $TargetSubscriptionId and resource group $TargetResourceGroup..."
@@ -63,11 +69,11 @@ if ("Y", "y" -contains $continueInput) {
     {
         if ($resultsSoFar -eq 0)
         {
-            $armExtensions = Search-AzGraph -Query $queryText -First $ARGPageSize -Subscription $subscriptions
+            $armExtensions = (Search-AzGraph -Query $queryText -First $ARGPageSize -Subscription $subscriptions).data
         }
         else
         {
-            $armExtensions = Search-AzGraph -Query $queryText -First $ARGPageSize -Skip $resultsSoFar -Subscription $subscriptions 
+            $armExtensions = (Search-AzGraph -Query $queryText -First $ARGPageSize -Skip $resultsSoFar -Subscription $subscriptions).data
         }
         $resultsCount = $armExtensions.Count
         $resultsSoFar += $resultsCount

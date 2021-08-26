@@ -14,10 +14,16 @@ $DiagnosticsTablesPrefixes = @('SchemasTable', 'WADDiagnosticInfrastructureLogsT
                                 'LinuxCpu','LinuxDisk','LinuxMemory')
 
 $ctx = Get-AzContext
-
-if (-not($ctx))
-{
-    $ctx = Connect-AzAccount -Environment $Cloud
+if (-not($ctx)) {
+    Connect-AzAccount -Environment $Cloud
+    $ctx = Get-AzContext
+}
+else {
+    if ($ctx.Environment.Name -ne $Cloud) {
+        Disconnect-AzAccount -ContextName $ctx.Name
+        Connect-AzAccount -Environment $Cloud
+        $ctx = Get-AzContext
+    }
 }
                                 
 Write-Output "About to remove all the Diagnostics Storage tables defined in $StorageAccountsCsvPath from subscription $TargetSubscriptionId and tenant $($ctx.Tenant.TenantId) ($Cloud)..."
