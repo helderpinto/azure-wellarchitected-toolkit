@@ -42,7 +42,7 @@ if ("Y", "y" -contains $continueInput) {
     
     if ([string]::IsNullOrEmpty($TargetSubscriptionId))
     {
-        $subscriptions = Get-AzSubscription | ForEach-Object { "$($_.Id)"}
+        $subscriptions = Get-AzSubscription | Where-Object { $_.State -eq "Enabled" } | ForEach-Object { "$($_.Id)"}
     }
     else
     {
@@ -55,11 +55,11 @@ if ("Y", "y" -contains $continueInput) {
     resources 
     | where type =~ 'microsoft.compute/virtualmachines/extensions' and tostring(properties.type) in ('LinuxDiagnostic', 'IaaSDiagnostics')
     | project id, name
-    | extend vmId = substring(id, 0, indexof(id, '/extensions/'))
+    | extend vmId = tolower(substring(id, 0, indexof(id, '/extensions/')))
     | join kind=inner (
         resources 
         | where type =~ 'microsoft.compute/virtualmachines'
-        | project vmId = id, vmName = name, resourceGroup, subscriptionId, powerState = tostring(properties.extended.instanceView.powerState.code)
+        | project vmId = tolower(id), vmName = name, resourceGroup, subscriptionId, powerState = tostring(properties.extended.instanceView.powerState.code)
     ) on vmId
     | project-away vmId, vmId1
     | order by id asc
