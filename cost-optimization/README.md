@@ -52,7 +52,7 @@ Don't get it wrong, but using the cloud without visibility over how you spend yo
 * Leverage [Azure Hybrid Benefit](https://azure.microsoft.com/en-us/pricing/hybrid-benefit/faq/) - bring your on-premises Windows Server and SQL Server licensing to Azure and, together with Reservations, save up to 85% on your Windows/SQL-based Azure workload costs.
 * Serverless/consumption-based vs. permanent compute allocation - if you have resource permanently allocated for workloads that have occasional usage, consider rearchitecting your solution to a [serverless consumption model](https://azure.microsoft.com/en-us/solutions/serverless/), where you allocate resources only when they're actually needed. Conversely, keeping a serverless approach for workloads that are under constant usage can become less cost and performance efficient when compared to a permanent resource allocation model.
 * Consolidate resources when possible (e.g., containerization, multiple databases in same engine/pool, multiple web apps in same App Service plan, etc.)
-* Implement [auto-scaling](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/autoscale-overview) or [automated shutdown/startup](https://docs.microsoft.com/en-us/azure/automation/automation-solution-vm-management).
+* Implement [auto-scaling](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/autoscale-overview) or automated shutdown/startup (using [Microsoft-supported Start/Stop VMs feature](https://docs.microsoft.com/en-us/azure/azure-functions/start-stop-vms/overview) or a simpler custom [PowerShell Automation runbook](./scripts/StartStop-VmsByJsonCondition.ps1)).
 
 ### Standardize resources usage
 
