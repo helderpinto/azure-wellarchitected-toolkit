@@ -26,11 +26,11 @@ The questions and initiatives below are based on the [Security pillar of the Wel
     * Implement Azure AD break-glass accounts
     * Implement separate accounts for administrators
     * Ensure on-premises AD administrators are not synced to Azure AD
-* Monitor security posture with Azure Security Center (ASC) and the Secure Score. Check ASC settings (default Log Analytics workspace, auto-provisioning or notification contacts). Ensure you periodically review and plan remediations for ASC recommendations.
+* Monitor security posture with Microsoft Defender for Cloud (MDfC) and the Secure Score. Check MDfC settings (default Log Analytics workspace, auto-provisioning or notification contacts). Ensure you periodically review and plan remediations for MDfC recommendations.
 * Review IaaS network security - network segmentation best practices, Network Security Groups applied to subnets with rules following best practices, correct usage of UDRs and Virtual Appliances such as Azure Firewall, or avoiding direct VM Internet connectivity are some examples. Other initiatives below provide useful pointers to specific actions that contribute to the overall network security health.
 * Review IaaS compute security ([best practices overview](https://docs.microsoft.com/en-us/azure/virtual-machines/security-recommendations))
 * Review PaaS native security controls. There are checklists for example for [Storage Accounts](https://docs.microsoft.com/en-us/azure/storage/blobs/security-recommendations) or [SQL Database](https://docs.microsoft.com/en-us/azure/azure-sql/database/security-best-practice), but all other PaaS services have their checklists as well.
-* Enforce security best practices with Azure Policy. Besides the policies built into Azure Security Center, there are other built-in Policies or custom ones that you should also consider:
+* Enforce security best practices with Azure Policy. Besides the policies built into MDfC (Azure Security Benchmark), there are other built-in Policies or custom ones that you should also consider:
     * Microsoft IaaSAntimalware extension should be deployed on Windows servers (/providers/Microsoft.Authorization/policyDefinitions/9b597639-28e4-48eb-b506-56b05d366257)
     * Flow log should be configured for every network security group (/providers/Microsoft.Authorization/policyDefinitions/c251913d-7d24-4958-af87-478ed3b9ba41)
     * [CUSTOM - Network Interfaces must not have Public IPs directly attached](policy/network-nic-withpublicip-auditdeny.json) (audit/deny)
@@ -42,8 +42,9 @@ The questions and initiatives below are based on the [Security pillar of the Wel
     * [CUSTOM - NSGs must not have Outbound rules for Any destination](policy/network-nsg-outbound-anydestination-auditdeny.json) (audit/deny)
     * [CUSTOM - Only Standard SKU Public IPs are allowed](policy/network-publicip-basic-auditdeny.json) (audit/deny)    
     * [CUSTOM - Subnets must be associated with a NSG](policy/network-subnet-withoutnsg-auditdeny.json) (audit/deny)    
-* Implement threat protection with Azure Defender
-* Implement SIEM/SOAR with Azure Sentinel
+* Implement threat protection with Microsoft Defender for Cloud
+* Implement Azure DDoS Protection Standard (see helper article and [script](./scripts/Get-PublicIPsAssociationsToVNet.ps1) for costs estimation)
+* Implement SIEM/SOAR with Microsoft Sentinel
 * Collect and centralize audit and security logs from Azure Activity, Azure AD (incl. Sign-in logs), PaaS services (SQL, Key Vault) or NSG (flow logs)
 * Implement patch management with Azure Update Management
 * Promote usage of Private Link for private network-only access to PaaS resources
@@ -64,4 +65,4 @@ The questions and initiatives below are based on the [Security pillar of the Wel
 * [NSG Optimization - spotting rules without activity](workbooks/nsg-optimization.json)
 * [Secure Score Over Time](https://techcommunity.microsoft.com/t5/azure-security-center/secure-score-over-time-power-bi-dashboard/ba-p/1799954)
 * [Update Management Summary Workbook](https://github.com/scautomation/Azure-Automation-Update-Management-Workbooks)
-* [Azure Security Center Enterprise Onboarding Guide](https://github.com/Azure/Azure-Security-Center/tree/onboarding/Onboarding)
+* [Microsoft Defender for Cloud Enterprise Onboarding Guide](https://github.com/Azure/Microsoft-Defender-for-Cloud/tree/onboarding/Onboarding)
