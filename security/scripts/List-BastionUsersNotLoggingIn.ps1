@@ -134,7 +134,12 @@ foreach ($bastion in $bastionsTotal)
                 {
                     Write-Output "Found $($group.DisplayName) group assignment."
                     $groupMembers = Get-AzADGroupMember -GroupObjectId $group.Id
-                    $usersAssigned += $groupMembers.UserPrincipalName
+                    Write-Output "Group has $($groupMembers.Count) users."
+                    foreach ($groupMember in $groupMembers)
+                    {
+                        $user = Get-AzADUser -ObjectId $groupMember.Id
+                        $usersAssigned += $user.UserPrincipalName
+                    }
                 }
             }
         }    
@@ -142,11 +147,11 @@ foreach ($bastion in $bastionsTotal)
 
     $usersAssigned = $usersAssigned | Select-Object -Unique
 
-    #Write-Output "Users assigned role: $usersAssigned"
+    Write-Output "There are $($usersAssigned.Count) unique users with role assigned in bastion"
 
     $bastionUsersLoggedIn = ($bastionAccessLogs | Where-Object { $_._ResourceId -eq $bastion.id }).UserName
 
-    #Write-Output "Users who logged in: $bastionUsersLoggedIn"
+    Write-Output "There were $($bastionUsersLoggedIn.Count) unique users logging in the bastion"
 
     foreach ($userAssigned in $usersAssigned)
     {
