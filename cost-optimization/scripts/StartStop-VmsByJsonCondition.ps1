@@ -1,7 +1,26 @@
 <#
 .SYNOPSIS
 
-Shuts down or starts VMs according to a tags condition.
+Shuts down or starts VMs according to a JSON object that may include all or some of the following conditions: set of tag/value pairs to meet, resource group names or 
+an Azure Resource Graph condition to be added to a where clause (you can find an example in the parameter definition below).
+
+Requirements: 
+- System-assigned Managed Identity enabled for the Automation Account (recommended, default authentication option) or a Run As Account (in this case, you need to 
+    create an Automation Variable StartStopVMs_AuthenticationOption with the value set to RunAsAccount)
+- In the scope of the automation (Management Group, Subscription, etc.), the Reader role assigned to the identity above and one of the following alternatives:
+    - Virtual Machine Contributor
+    - (recommended) Custom role with the following permissions: Microsoft.Compute/virtualMachines/start/action and Microsoft.Compute/virtualMachines/deallocate/action
+- Install or upgrade the following Modules in the Azure Automation Account
+    - Az.Accounts
+    - Az.Compute
+    - Az.ResourceGraph
+
+Usage:
+- After importing and publishing this runbook (PowerShell 5.1) into the Automation Account, create as many Automation Schedules as you need for the different start/stop scenarios, e.g.,
+    - Daily stop at 6 PM all VMs having a shutdownPolicy tag set to Daily
+    - Weekdays start all VMs at 8 AM having a startupPolicy tag set to Weekdays
+    - Whatever start/stop need you may have, even the weirdest ones, such as start all Windows VMs with a B size every Sunday at 11 AM
+- Link this runbook to the above schedules, filling in the required parameters as described below.
 
 .PARAMETER Simulate
 Whether the outcome will be simulated or not
