@@ -1,0 +1,235 @@
+{
+    "mode": "All",
+    "displayName": "Deploy alert processing rule for Backup alerts",
+    "policyRule": {
+        "if": {
+            "allOf": [
+                {
+                    "field": "type",
+                    "equals": "Microsoft.resources/subscriptions"
+                }
+            ]
+        },
+        "then": {
+            "effect": "[parameters('effect')]",
+            "details": {
+                "type": "Microsoft.AlertsManagement/actionRules",
+                "roleDefinitionIds": [
+                    "/providers/Microsoft.Authorization/roleDefinitions/749f88d5-cbae-40b8-bcfc-e573ddc772fa"
+                ],
+                "existenceScope": "Subscription",
+                "existenceCondition": {
+                    "allOf": [
+                        {
+                            "anyOf": [
+                                {
+                                    "field": "Microsoft.AlertsManagement/actionRules/conditions",
+                                    "contains": "microsoft.recoveryservices/vaults"
+                                },
+                                {
+                                    "field": "Microsoft.AlertsManagement/actionRules/conditions",
+                                    "contains": "microsoft.dataprotection/backupvaults"
+                                }        
+                            ]
+                        },
+                        {
+                            "field": "Microsoft.AlertsManagement/actionRules/conditions.targetResourceType.operator",
+                            "equals": "Equals"
+                        },
+                        {
+                            "field": "Microsoft.AlertsManagement/actionRules/type",
+                            "equals": "ActionGroup"
+                        },
+                        {
+                            "field": "Microsoft.AlertsManagement/actionRules/suppressionConfig.schedule",
+                            "exists": false
+                        }
+                    ]
+                },
+                "deploymentScope": "Subscription",
+                "deployment": {
+                    "subscriptionId": "[subscription().id]",
+                    "location": "westeurope",
+                    "properties": {
+                        "mode": "incremental",
+                        "template": {
+                            "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+                            "contentVersion": "1.0.0.0",
+                            "parameters": {
+                                "actionGroupId": {
+                                    "type": "string"
+                                },
+                                "serviceHealthAlertName": {
+                                    "type": "string"
+                                },
+                                "serviceHealthAlertRG": {
+                                    "type": "string"
+                                },
+                                "serviceHealthAlertRGLocation": {
+                                    "type": "string"
+                                },
+                                "impactedRegions": {
+                                    "type": "array"
+                                }
+                            },
+                            "resources": [
+                                {
+                                    "type": "Microsoft.Resources/resourceGroups",
+                                    "apiVersion": "2020-06-01",
+                                    "name": "[parameters('serviceHealthAlertRG')]",
+                                    "location": "[parameters('serviceHealthAlertRGLocation')]",
+                                    "properties": {}
+                                },
+                                {
+                                    "type": "Microsoft.Resources/deployments",
+                                    "apiVersion": "2020-06-01",
+                                    "name": "nestedDeployment",
+                                    "dependsOn": [
+                                        "[resourceId('Microsoft.Resources/resourceGroups', parameters('serviceHealthAlertRG'))]"
+                                    ],
+                                    "resourceGroup": "[parameters('serviceHealthAlertRG')]",
+                                    "properties": {
+                                        "mode": "Incremental",
+                                        "template": {
+                                            "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                                            "contentVersion": "1.0.0.0",
+                                            "parameters": {
+                                                "actionGroupId": {
+                                                    "type": "string"
+                                                },
+                                                "serviceHealthAlertName": {
+                                                    "type": "string"
+                                                },
+                                                "impactedRegions": {
+                                                    "type": "array"
+                                                }
+                                            },
+                                            "resources": [
+                                                {
+                                                    "type": "Microsoft.Insights/activityLogAlerts",
+                                                    "apiVersion": "2017-04-01",
+                                                    "name": "[parameters('serviceHealthAlertName')]",
+                                                    "location": "Global",
+                                                    "properties": {
+                                                        "enabled": true,
+                                                        "description": "Service Health alerts for all incident types and specific services/regions",
+                                                        "scopes": [
+                                                            "[subscription().id]"
+                                                        ],
+                                                        "condition": {
+                                                            "allOf": [
+                                                                {
+                                                                    "field": "category",
+                                                                    "equals": "ServiceHealth"
+                                                                },
+                                                                {
+                                                                    "field": "properties.impactedServices[*].ImpactedRegions[*].RegionName",
+                                                                    "containsAny": "[parameters('impactedRegions')]"
+                                                                }
+                                                            ]
+                                                        },
+                                                        "actions": {
+                                                            "actionGroups": [
+                                                                {
+                                                                    "actionGroupId": "[parameters('actionGroupId')]"
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "parameters": {
+                                            "serviceHealthAlertName": {
+                                                "value": "[parameters('serviceHealthAlertName')]"
+                                            },
+                                            "impactedRegions": {
+                                                "value": "[parameters('impactedRegions')]"
+                                            },
+                                            "actionGroupId": {
+                                                "value": "[parameters('actionGroupId')]"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        "parameters": {
+                            "serviceHealthAlertName": {
+                                "value": "[parameters('serviceHealthAlertName')]"
+                            },
+                            "serviceHealthAlertRG": {
+                                "value": "[parameters('serviceHealthAlertRG')]"
+                            },
+                            "serviceHealthAlertRGLocation": {
+                                "value": "[parameters('serviceHealthAlertRGLocation')]"
+                            },
+                            "impactedRegions": {
+                                "value": "[parameters('impactedRegions')]"
+                            },
+                            "actionGroupId": {
+                                "value": "[parameters('actionGroupId')]"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "parameters": {
+        "impactedRegions": {
+            "type": "array",
+            "metadata": {
+                "description": "List of impacted regions",
+                "displayName": "Impacted Regions"
+            },
+            "defaultValue": [
+                "Global",
+                "West Europe"
+            ]
+        },
+        "actionGroupId": {
+            "type": "string",
+            "metadata": {
+                "description": "Id for the Action group.",
+                "displayName": "Action Group",
+                "strongType": "microsoft.insights/actiongroups"
+            }
+        },
+        "serviceHealthAlertName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name for the Activity log alert.",
+                "displayName": "Alert Name"
+            }
+        },
+        "serviceHealthAlertRG": {
+            "type": "string",
+            "metadata": {
+                "description": "This is the name of the Resource Group that will contain the Service Health alert resource.",
+                "displayName": "Alert Resource Group Name"
+            }
+        },
+        "serviceHealthAlertRGLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "This is the location of the Resource Group where to store the alert.",
+                "displayName": "Alert Resource Group Location",
+                "strongType": "location"
+            },
+            "defaultValue": "westeurope"
+        },
+        "effect": {
+            "type": "String",
+            "metadata": {
+                "displayName": "Effects",
+                "description": "Enable or disable the execution of the Policy."
+            },
+            "allowedValues": [
+                "DeployIfNotExists",
+                "Disabled"
+            ],
+            "defaultValue": "DeployIfNotExists"
+        }
+    }
+}

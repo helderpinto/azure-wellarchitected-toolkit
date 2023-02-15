@@ -5,9 +5,9 @@ Shuts down or starts VMs according to a JSON object that may include all or some
 an Azure Resource Graph condition to be added to a where clause (you can find an example in the parameter definition below).
 
 Requirements: 
-- System-assigned Managed Identity enabled for the Automation Account (recommended, default authentication option) or a Run As Account (in this case, you need to 
+- System-assigned or User-assigned Managed Identity (bot not both) enabled for the Automation Account (recommended, default authentication option) or a Run As Account (in this case, you need to 
     create an Automation Variable StartStopVMs_AuthenticationOption with the value set to RunAsAccount)
-- In the scope of the automation (Management Group, Subscription, etc.), the Reader role assigned to the identity above and one of the following alternatives:
+- In the scope of the automation (Management Group, Subscription, Resource Group, etc.), the Reader role assigned to the identity above and one of the following alternatives:
     - Virtual Machine Contributor
     - (recommended) Custom role with the following permissions: Microsoft.Compute/virtualMachines/start/action and Microsoft.Compute/virtualMachines/deallocate/action
 - Install or upgrade the following Modules in the Azure Automation Account
@@ -29,7 +29,7 @@ Whether the outcome will be simulated or not
 Desired state for the VM: StoppedDeallocated or Running
 
 .PARAMETER ConditionDefinition
-A JSON object enumerating the tags name/values pairs and/or resource group names that must be met by the VM to be included in the scope. Example:
+A JSON object enumerating the tags name/values pairs and/or resource group names that must be met by the VM to be included in the scope. Bear in mind that if you use a combination of tags, resource groups and ARG query, the behavior will be a logic AND of all conditions. Example:
 {
     "tagsCondition": [
         {
@@ -185,7 +185,7 @@ switch ($authenticationOption) {
         break
     }
     "ManagedIdentity" { 
-        Connect-AzAccount -Identity
+        Connect-AzAccount -Identity -EnvironmentName $cloudEnvironment
         break
     }
     Default {

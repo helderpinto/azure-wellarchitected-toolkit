@@ -1,6 +1,6 @@
 # Cost Optimization
 
-Making a cost-effective usage of Azure is a priority for all organizations running applications and services in the cloud. The questions and initiatives below are based on the [Cost Optimization pillar of the Well-Architected Framework](https://docs.microsoft.com/en-us/azure/architecture/framework/cost/). Reflect on each question and priorize/plan the initiatives of the Cost Optimization playbook.
+Making a cost-effective usage of Azure is a priority for all organizations running applications and services in the cloud. The questions and initiatives below are based on the [Cost Optimization pillar of the Well-Architected Framework](https://docs.microsoft.com/en-us/azure/architecture/framework/cost/). Reflect on each question and priorize/plan the initiatives of the Cost Optimization playbook. For a comprehensive list of Azure cost optimization resources, check out the [Azure FinOps Guide](https://github.com/dolevshor/azure-finops-guide)  
 
 ## Questions to make 
 
