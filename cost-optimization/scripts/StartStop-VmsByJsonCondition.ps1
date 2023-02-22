@@ -78,7 +78,7 @@ function BuildARGWhereClause {
 
     $whereClause = ""
     $clauseTagsSegmentTemplate = " and tags.['{0}'] =~ '{1}'"
-    $clauseResourceGroupSegmentTemplate = " and resourceGroup in ('{0}')"
+    $clauseResourceGroupSegmentTemplate = " and resourceGroup in~ ('{0}')"
     $clauseResourceGraphSegmentTemplate = " and {0}"
     
     foreach ($tag in $ConditionJson.tagsCondition) {
