@@ -185,7 +185,15 @@ switch ($authenticationOption) {
         break
     }
     "ManagedIdentity" { 
-        Connect-AzAccount -Identity -EnvironmentName $cloudEnvironment
+        $userAssignedMI = Get-AutomationVariable -Name "StartStopVMs_UserAssignedManagedIdentityClientID" -ErrorAction SilentlyContinue
+        if ($userAssignedMI)
+        {
+            Connect-AzAccount -Identity -AccountId $userAssignedMI -EnvironmentName $cloudEnvironment
+        }
+        else
+        {
+            Connect-AzAccount -Identity -EnvironmentName $cloudEnvironment
+        }
         break
     }
     Default {
