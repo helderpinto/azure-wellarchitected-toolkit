@@ -5,8 +5,9 @@ Shuts down or starts VMs according to a JSON object that may include all or some
 an Azure Resource Graph condition to be added to a where clause (you can find an example in the parameter definition below).
 
 Requirements: 
-- System-assigned or User-assigned Managed Identity (bot not both) enabled for the Automation Account (recommended, default authentication option) or a Run As Account (in this case, you need to 
+- System-assigned or User-assigned Managed Identity enabled for the Automation Account (recommended, default authentication option) or a Run As Account (in this case, you need to 
     create an Automation Variable StartStopVMs_AuthenticationOption with the value set to RunAsAccount)
+- If you are using a User-assigned Managed Identity, you must create a StartStopVMs_UserAssignedManagedIdentityClientID Automation Variable with the Managed Identity Client ID as value
 - In the scope of the automation (Management Group, Subscription, Resource Group, etc.), the Reader role assigned to the identity above and one of the following alternatives:
     - Virtual Machine Contributor
     - (recommended) Custom role with the following permissions: Microsoft.Compute/virtualMachines/start/action and Microsoft.Compute/virtualMachines/deallocate/action
