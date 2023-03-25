@@ -125,7 +125,7 @@
     {
       "type": 1,
       "content": {
-        "json": "## Log Analytics Usage by Tag\r\n\r\nAfter setting the aggregation `Tag Name` parameter above, results will populate as a table with each resource ID sending logs to Log Analytics and its respective tag value, usage in GB and cost in {Currency}. Some usage may be attributed to an empty resource, which means its logs are not attributable to a specific resource (i.e., do not contain a `_ResourceId` column)."
+        "json": "## Log Analytics Usage by Tag\r\n\r\nAfter setting the aggregation `Tag Name` parameter above, results will populate as a table with each resource ID sending logs to Log Analytics and its respective tag value, usage in GB and cost in {Currency}. Some usage may be attributed to an empty resource, which means its logs are not attributable to a specific resource (i.e., do not contain a `_ResourceId` column). You can then export the results to Excel and do further analysis."
       },
       "name": "introText"
     },
