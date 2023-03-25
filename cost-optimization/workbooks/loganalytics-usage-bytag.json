@@ -1,0 +1,264 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 1,
+      "content": {
+        "json": "## Log Analytics Usage by Tag\r\n\r\nAfter setting the aggregation `Tag Name` parameter below, results will populate as a table with each resource ID sending logs to Log Analytics and its respective tag value, usage in GB and cost in {Currency}. Some usage may be attributed to an empty resource, which means its logs are not attributable to a specific resource (i.e., do not contain a `_ResourceId` column). You can then export the results to Excel and do further analysis."
+      },
+      "name": "introText"
+    },
+    {
+      "type": 9,
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "parameters": [
+          {
+            "id": "6fda8baa-d8d4-43b6-944e-9581c3338121",
+            "version": "KqlParameterItem/1.0",
+            "name": "LAWorkspaces",
+            "label": "Log Analytics Workspaces",
+            "type": 5,
+            "isRequired": true,
+            "multiSelect": true,
+            "quote": "'",
+            "delimiter": ",",
+            "query": "resources\r\n| where type == 'microsoft.operationalinsights/workspaces'\r\n| project id,name\r\n| order by name asc",
+            "crossComponentResources": [
+              "value::all"
+            ],
+            "value": [
+              "value::all"
+            ],
+            "typeSettings": {
+              "additionalResourceOptions": [
+                "value::all"
+              ],
+              "showDefault": false
+            },
+            "timeContext": {
+              "durationMs": 86400000
+            },
+            "queryType": 1,
+            "resourceType": "microsoft.resourcegraph/resources"
+          },
+          {
+            "id": "73ab229b-2522-4f57-97f8-0f07a5375389",
+            "version": "KqlParameterItem/1.0",
+            "name": "LATimeRange",
+            "label": "Consumption Time Range",
+            "type": 4,
+            "isRequired": true,
+            "value": {
+              "durationMs": 86400000
+            },
+            "typeSettings": {
+              "selectableValues": [
+                {
+                  "durationMs": 86400000
+                },
+                {
+                  "durationMs": 172800000
+                },
+                {
+                  "durationMs": 259200000
+                },
+                {
+                  "durationMs": 604800000
+                },
+                {
+                  "durationMs": 1209600000
+                },
+                {
+                  "durationMs": 2419200000
+                },
+                {
+                  "durationMs": 2592000000
+                },
+                {
+                  "durationMs": 5184000000
+                },
+                {
+                  "durationMs": 7776000000
+                }
+              ],
+              "allowCustom": true
+            },
+            "timeContext": {
+              "durationMs": 86400000
+            }
+          },
+          {
+            "id": "ad0e1506-6589-41ea-b6c3-e6e7e295e154",
+            "version": "KqlParameterItem/1.0",
+            "name": "LAIngestionPrice",
+            "label": "Ingestion Price (per GB)",
+            "type": 1,
+            "isRequired": true,
+            "value": "2.99"
+          },
+          {
+            "id": "55ae6595-a02e-4de4-af1e-0c9ecad9079f",
+            "version": "KqlParameterItem/1.0",
+            "name": "Currency",
+            "type": 1,
+            "isRequired": true,
+            "value": "EUR"
+          },
+          {
+            "id": "db75863e-7b53-4335-a91a-cc8962468b52",
+            "version": "KqlParameterItem/1.0",
+            "name": "TagName",
+            "label": "Tag Name",
+            "type": 2,
+            "query": "resources\r\n| where isnotempty(tags)\r\n| extend jsonTags = parse_json(tags)\r\n| extend tagKeys = bag_keys(jsonTags)\r\n| mv-expand tagKey = tagKeys\r\n| extend tagKey = tostring(tagKey)\r\n| where tagKey !startswith 'hidden' and tagKey !startswith \"aks-managed\" and tagKey !startswith \"kubernetes.io\"\r\n| distinct tagKey\r\n| order by tagKey asc",
+            "crossComponentResources": [
+              "value::selected"
+            ],
+            "typeSettings": {
+              "additionalResourceOptions": []
+            },
+            "queryType": 1,
+            "resourceType": "microsoft.resourcegraph/resources",
+            "value": null
+          }
+        ],
+        "style": "pills",
+        "queryType": 0,
+        "resourceType": "microsoft.resourcegraph/resources"
+      },
+      "name": "parameters"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "union *\r\n| extend _ResourceId = tolower(_ResourceId)\r\n| extend LogPrice = iif(_IsBillable == 'True', {LAIngestionPrice}, 0.0)\r\n| summarize ['Ingested GB']=sum(_BilledSize/1024/1024/1024), ['Ingestion Cost ({Currency})']=sum(_BilledSize/1024/1024/1024*LogPrice) by _ResourceId\r\n| order by ['Ingested GB']",
+        "size": 1,
+        "title": "Ingestion volume by resource",
+        "timeContextFromParameter": "LATimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{LAWorkspaces}"
+        ],
+        "gridSettings": {
+          "rowLimit": 10000
+        }
+      },
+      "conditionalVisibility": {
+        "parameterName": "debug",
+        "comparison": "isEqualTo",
+        "value": "true"
+      },
+      "customWidth": "50",
+      "name": "billedSizeByResourceId"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "resources\r\n| extend resourceTag = tags['{TagName:label}']\r\n| where isnotempty(resourceTag)\r\n| project _ResourceId=tolower(id), resourceTag",
+        "size": 1,
+        "title": "Resources tag classification",
+        "queryType": 1,
+        "resourceType": "microsoft.resourcegraph/resources",
+        "crossComponentResources": [
+          "value::all"
+        ],
+        "gridSettings": {
+          "rowLimit": 10000
+        }
+      },
+      "conditionalVisibility": {
+        "parameterName": "debug",
+        "comparison": "isEqualTo",
+        "value": "true"
+      },
+      "customWidth": "50",
+      "name": "resourceTags"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "{\"version\":\"Merge/1.0\",\"merges\":[{\"id\":\"add30f5c-c21e-4034-8018-e42a1ba0102f\",\"mergeType\":\"leftouter\",\"leftTable\":\"billedSizeByResourceId\",\"rightTable\":\"resourceTags\",\"leftColumn\":\"_ResourceId\",\"rightColumn\":\"_ResourceId\"}],\"projectRename\":[{\"originalName\":\"[billedSizeByResourceId]._ResourceId\",\"mergedName\":\"_ResourceId\",\"fromId\":\"add30f5c-c21e-4034-8018-e42a1ba0102f\"},{\"originalName\":\"[resourceTags].resourceTag\",\"mergedName\":\"resourceTag\",\"fromId\":\"add30f5c-c21e-4034-8018-e42a1ba0102f\"},{\"originalName\":\"[billedSizeByResourceId].Ingested GB\",\"mergedName\":\"Ingested GB\",\"fromId\":\"add30f5c-c21e-4034-8018-e42a1ba0102f\"},{\"originalName\":\"[billedSizeByResourceId].Ingestion Cost (EUR)\",\"mergedName\":\"Ingestion Cost (EUR)\",\"fromId\":\"add30f5c-c21e-4034-8018-e42a1ba0102f\"},{\"originalName\":\"[resourceTags]._ResourceId\",\"mergedName\":\"_ResourceId1\",\"fromId\":\"add30f5c-c21e-4034-8018-e42a1ba0102f\"}]}",
+        "size": 0,
+        "showExportToExcel": true,
+        "queryType": 7,
+        "gridSettings": {
+          "formatters": [
+            {
+              "columnMatch": "Ingested GB",
+              "formatter": 1,
+              "numberFormat": {
+                "unit": 5,
+                "options": {
+                  "style": "decimal",
+                  "minimumFractionDigits": 3,
+                  "maximumFractionDigits": 3
+                }
+              }
+            },
+            {
+              "columnMatch": "Ingestion Cost (EUR)",
+              "formatter": 1,
+              "numberFormat": {
+                "unit": 17,
+                "options": {
+                  "style": "decimal",
+                  "minimumFractionDigits": 3,
+                  "maximumFractionDigits": 3
+                }
+              }
+            },
+            {
+              "columnMatch": "_ResourceId1",
+              "formatter": 5
+            },
+            {
+              "columnMatch": "IngestedGB",
+              "formatter": 1,
+              "numberFormat": {
+                "unit": 39,
+                "options": {
+                  "style": "decimal",
+                  "minimumFractionDigits": 3,
+                  "maximumFractionDigits": 3
+                }
+              }
+            },
+            {
+              "columnMatch": "IngestionCost",
+              "formatter": 1,
+              "numberFormat": {
+                "unit": 17,
+                "options": {
+                  "style": "decimal",
+                  "minimumFractionDigits": 3,
+                  "maximumFractionDigits": 3
+                }
+              }
+            }
+          ],
+          "rowLimit": 10000,
+          "labelSettings": [
+            {
+              "columnId": "_ResourceId",
+              "label": "Resource"
+            },
+            {
+              "columnId": "resourceTag",
+              "label": "Tag Value"
+            }
+          ]
+        }
+      },
+      "name": "billedResourcesByTag"
+    }
+  ],
+  "fallbackResourceIds": [
+    "Azure Monitor"
+  ],
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
+}
