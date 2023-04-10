@@ -194,7 +194,7 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
-        "query": "union *\r\n| where TimeGenerated >= todatetime('{LATimeRange:startISO}') and TimeGenerated <= todatetime('{LATimeRange:endISO}')\r\n| extend _ResourceId = tolower(iif(_ResourceId has 'microsoft.storage/storageaccounts', strcat_array(array_slice(split(_ResourceId, '/'),0,8),'/'), _ResourceId))\r\n| project _ResourceId, _IsBillable, _BilledSize\r\n| extend LogPrice = iif(_IsBillable == 'True', {LAIngestionPrice}, 0.0)\r\n| summarize ['Ingested GB']=sum(_BilledSize/1024/1024/1024), ['Ingestion Cost']=sum(_BilledSize/1024/1024/1024*LogPrice) by _ResourceId\r\n| order by ['Ingested Cost']",
+        "query": "union *\r\n| where TimeGenerated >= todatetime('{LATimeRange:startISO}') and TimeGenerated <= todatetime('{LATimeRange:endISO}')\r\n| extend _ResourceId = tolower(iif(_ResourceId has 'microsoft.storage/storageaccounts', strcat_array(array_slice(split(_ResourceId, '/'),0,8),'/'), _ResourceId))\r\n| project _ResourceId, _IsBillable, _BilledSize\r\n| extend LogPrice = iif(_IsBillable == 'True', {LAIngestionPrice}, 0.0)\r\n| summarize ['Ingested GB']=sum(_BilledSize/1024/1024/1024), ['Ingestion Cost']=sum(_BilledSize/1024/1024/1024*LogPrice) by _ResourceId\r\n| order by ['Ingestion Cost']",
         "size": 1,
         "title": "Ingestion volume by resource",
         "queryType": 0,
