@@ -185,7 +185,7 @@
     {
       "type": 1,
       "content": {
-        "json": "- Don't forget to adjust the Ingestion Price according to your pricesheet and Azure region(s). \r\n- This workbook assumes all tables are priced as Analytics Logs and does not include other cost factors such as logs retention beyond 31 days or Basics Logs queries. \r\n- Use filtering judiciously: the larger the consumption time range the longer the workbook loading time will be, especially if your tenant has tens or hundreds of workspaces with a large amount of data. ",
+        "json": "- Don't forget to adjust the Ingestion Price according to your pricesheet and Azure region(s). \r\n- This workbook assumes all tables are priced as Analytics Logs and does not include other cost factors such as logs retention beyond 31 days or Basic Logs queries. \r\n- Use filtering judiciously: the larger the consumption time range the longer the workbook will take to load, especially if your tenant has tens or hundreds of workspaces with a large amount of data. ",
         "style": "warning"
       },
       "name": "warningText"
