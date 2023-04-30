@@ -185,7 +185,7 @@
     {
       "type": 1,
       "content": {
-        "json": "- Don't forget to adjust the Ingestion Price according to your pricesheet and Azure region(s). \r\n- This workbook assumes all tables are priced as Analytics Logs and does not include other cost factors such as logs retention beyond 31 days or Basic Logs queries. \r\n- Use filtering judiciously: the larger the consumption time range the longer the workbook will take to load, especially if your tenant has tens or hundreds of workspaces with a large amount of data. ",
+        "json": "- Don't forget to adjust the Ingestion Price according to your pricesheet and Azure region(s). \r\n- This workbook assumes all tables are priced as Analytics Logs and does not include other cost factors such as Basic Logs, retention beyond 31 days, or Basic Logs queries. \r\n- Use filtering judiciously: the larger the consumption time range the longer the workbook will take to load, especially if your tenant has tens or hundreds of workspaces with a large amount of data. ",
         "style": "warning"
       },
       "name": "warningText"
@@ -194,7 +194,7 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
-        "query": "union *\r\n| where TimeGenerated >= todatetime('{LATimeRange:startISO}') and TimeGenerated <= todatetime('{LATimeRange:endISO}')\r\n| extend _ResourceId = tolower(iif(_ResourceId has 'microsoft.storage/storageaccounts', strcat_array(array_slice(split(_ResourceId, '/'),0,8),'/'), _ResourceId))\r\n| project _ResourceId, _IsBillable, _BilledSize\r\n| extend LogPrice = iif(_IsBillable == 'True', {LAIngestionPrice}, 0.0)\r\n| summarize ['Ingested GB']=sum(_BilledSize/1024/1024/1024), ['Ingestion Cost']=sum(_BilledSize/1024/1024/1024*LogPrice) by _ResourceId\r\n| order by ['Ingestion Cost']",
+        "query": "union *\r\n| where TimeGenerated >= todatetime('{LATimeRange:startISO}') and TimeGenerated <= todatetime('{LATimeRange:endISO}')\r\n| where isnotempty(_ResourceId)\r\n| extend _ResourceId = tolower(iif(_ResourceId has 'microsoft.storage/storageaccounts' or _ResourceId has 'microsoft.compute/virtualmachinescalesets', strcat_array(array_slice(split(_ResourceId, '/'),0,8),'/'), _ResourceId))\r\n| project _ResourceId, _IsBillable, _BilledSize\r\n| extend LogPrice = iif(_IsBillable == 'True', {LAIngestionPrice}, 0.0)\r\n| summarize ['Ingested GB']=sum(_BilledSize/1024/1024/1024), ['Ingestion Cost']=sum(_BilledSize/1024/1024/1024*LogPrice) by _ResourceId\r\n| order by ['Ingestion Cost']",
         "size": 1,
         "title": "Ingestion volume by resource",
         "queryType": 0,
@@ -213,6 +213,30 @@
       },
       "customWidth": "50",
       "name": "billedSizeByResourceId"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "union *\r\n| where TimeGenerated >= todatetime('{LATimeRange:startISO}') and TimeGenerated <= todatetime('{LATimeRange:endISO}')\r\n| where isempty(_ResourceId)\r\n| project TenantId, _IsBillable, _BilledSize\r\n| extend LogPrice = iif(_IsBillable == 'True', {LAIngestionPrice}, 0.0)\r\n| summarize ['Ingested GB']=sum(_BilledSize/1024/1024/1024), ['Ingestion Cost']=sum(_BilledSize/1024/1024/1024*LogPrice) by TenantId\r\n| order by ['Ingestion Cost']",
+        "size": 1,
+        "title": "Ingestion volume by workspace (for non-identified resources)",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{LAWorkspaces}"
+        ],
+        "gridSettings": {
+          "rowLimit": 10000
+        }
+      },
+      "conditionalVisibility": {
+        "parameterName": "debug",
+        "comparison": "isEqualTo",
+        "value": "true"
+      },
+      "customWidth": "50",
+      "name": "billedSizeByWorkspace"
     },
     {
       "type": 3,
@@ -242,8 +266,33 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
+        "query": "resources\r\n| where type == 'microsoft.operationalinsights/workspaces'\r\n| extend resourceTag = tags['{TagName:label}']\r\n| extend TenantId = tostring(properties.customerId)\r\n| project resourceId=tolower(id), TenantId, resourceTag",
+        "size": 1,
+        "title": "Workspaces tag classification",
+        "queryType": 1,
+        "resourceType": "microsoft.resourcegraph/resources",
+        "crossComponentResources": [
+          "value::all"
+        ],
+        "gridSettings": {
+          "rowLimit": 10000
+        }
+      },
+      "conditionalVisibility": {
+        "parameterName": "debug",
+        "comparison": "isEqualTo",
+        "value": "true"
+      },
+      "customWidth": "50",
+      "name": "workspaceTags"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
         "query": "{\"version\":\"Merge/1.0\",\"merges\":[{\"id\":\"add30f5c-c21e-4034-8018-e42a1ba0102f\",\"mergeType\":\"leftouter\",\"leftTable\":\"billedSizeByResourceId\",\"rightTable\":\"resourceTags\",\"leftColumn\":\"_ResourceId\",\"rightColumn\":\"_ResourceId\"}],\"projectRename\":[{\"originalName\":\"[billedSizeByResourceId]._ResourceId\",\"mergedName\":\"_ResourceId\",\"fromId\":\"add30f5c-c21e-4034-8018-e42a1ba0102f\"},{\"originalName\":\"[resourceTags].resourceTag\",\"mergedName\":\"resourceTag\",\"fromId\":\"add30f5c-c21e-4034-8018-e42a1ba0102f\"},{\"originalName\":\"[billedSizeByResourceId].Ingested GB\",\"mergedName\":\"Ingested GB\",\"fromId\":\"add30f5c-c21e-4034-8018-e42a1ba0102f\"},{\"originalName\":\"[billedSizeByResourceId].Ingestion Cost\",\"mergedName\":\"Ingestion Cost\",\"fromId\":\"add30f5c-c21e-4034-8018-e42a1ba0102f\"},{\"originalName\":\"[resourceTags]._ResourceId\",\"mergedName\":\"_ResourceId1\",\"fromId\":\"add30f5c-c21e-4034-8018-e42a1ba0102f\"}]}",
         "size": 0,
+        "title": "Billed usage by identifiable resource",
         "showExportToExcel": true,
         "queryType": 7,
         "gridSettings": {
@@ -251,6 +300,9 @@
             {
               "columnMatch": "Ingested GB",
               "formatter": 1,
+              "formatOptions": {
+                "customColumnWidthSetting": "20ch"
+              },
               "numberFormat": {
                 "unit": 5,
                 "options": {
@@ -261,12 +313,11 @@
               }
             },
             {
-              "columnMatch": "_ResourceId1",
-              "formatter": 5
-            },
-            {
               "columnMatch": "Ingestion Cost",
               "formatter": 1,
+              "formatOptions": {
+                "customColumnWidthSetting": "20ch"
+              },
               "numberFormat": {
                 "unit": 17,
                 "options": {
@@ -275,6 +326,10 @@
                   "maximumFractionDigits": 3
                 }
               }
+            },
+            {
+              "columnMatch": "_ResourceId1",
+              "formatter": 5
             }
           ],
           "rowLimit": 10000,
@@ -290,7 +345,78 @@
           ]
         }
       },
+      "customWidth": "50",
       "name": "billedResourcesByTag"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "{\"version\":\"Merge/1.0\",\"merges\":[{\"id\":\"add30f5c-c21e-4034-8018-e42a1ba0102f\",\"mergeType\":\"leftouter\",\"leftTable\":\"billedSizeByWorkspace\",\"rightTable\":\"workspaceTags\",\"leftColumn\":\"TenantId\",\"rightColumn\":\"TenantId\"}],\"projectRename\":[{\"originalName\":\"[workspaceTags].resourceId\",\"mergedName\":\"resourceId\",\"fromId\":\"add30f5c-c21e-4034-8018-e42a1ba0102f\"},{\"originalName\":\"[workspaceTags].resourceTag\",\"mergedName\":\"resourceTag\",\"fromId\":\"add30f5c-c21e-4034-8018-e42a1ba0102f\"},{\"originalName\":\"[billedSizeByWorkspace].TenantId\",\"mergedName\":\"TenantId\",\"fromId\":\"add30f5c-c21e-4034-8018-e42a1ba0102f\"},{\"originalName\":\"[billedSizeByWorkspace].Ingested GB\",\"mergedName\":\"Ingested GB\",\"fromId\":\"add30f5c-c21e-4034-8018-e42a1ba0102f\"},{\"originalName\":\"[billedSizeByWorkspace].Ingestion Cost\",\"mergedName\":\"Ingestion Cost\",\"fromId\":\"add30f5c-c21e-4034-8018-e42a1ba0102f\"},{\"originalName\":\"[workspaceTags].TenantId\",\"mergedName\":\"TenantId1\",\"fromId\":\"add30f5c-c21e-4034-8018-e42a1ba0102f\"}]}",
+        "size": 0,
+        "title": "Billed usage by workspace (for non-identifiable resources)",
+        "showExportToExcel": true,
+        "queryType": 7,
+        "gridSettings": {
+          "formatters": [
+            {
+              "columnMatch": "TenantId",
+              "formatter": 5
+            },
+            {
+              "columnMatch": "Ingested GB",
+              "formatter": 1,
+              "formatOptions": {
+                "customColumnWidthSetting": "20ch"
+              },
+              "numberFormat": {
+                "unit": 5,
+                "options": {
+                  "style": "decimal",
+                  "minimumFractionDigits": 3,
+                  "maximumFractionDigits": 3
+                }
+              }
+            },
+            {
+              "columnMatch": "Ingestion Cost",
+              "formatter": 1,
+              "formatOptions": {
+                "customColumnWidthSetting": "20ch"
+              },
+              "numberFormat": {
+                "unit": 17,
+                "options": {
+                  "style": "decimal",
+                  "minimumFractionDigits": 3,
+                  "maximumFractionDigits": 3
+                }
+              }
+            },
+            {
+              "columnMatch": "TenantId1",
+              "formatter": 5
+            },
+            {
+              "columnMatch": "_ResourceId1",
+              "formatter": 5
+            }
+          ],
+          "rowLimit": 10000,
+          "labelSettings": [
+            {
+              "columnId": "resourceId",
+              "label": "Workspace"
+            },
+            {
+              "columnId": "resourceTag",
+              "label": "Tag Value"
+            }
+          ]
+        }
+      },
+      "customWidth": "50",
+      "name": "nonIdentifiableResourcesByWorkspaceTag"
     }
   ],
   "fallbackResourceIds": [
