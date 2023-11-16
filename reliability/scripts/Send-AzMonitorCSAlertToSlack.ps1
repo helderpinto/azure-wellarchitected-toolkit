@@ -106,10 +106,13 @@ if ($WebhookData)
             }
         }
 
-        $attachmentFields += New-Object PSObject -Property @{
-            title = "Log search results ($resultsCount rows)"
-            value = "<$linkToSearchResults|click here>"
-            short = 'true'
+        if (-not([string]::IsNullOrEmpty($linkToSearchResults)))
+        {
+            $attachmentFields += New-Object PSObject -Property @{
+                title = "Log search results ($resultsCount rows)"
+                value = "<$linkToSearchResults|click here>"
+                short = 'true'
+            }
         }
     }
     elseif ($signalType -eq "Activity Log") {
