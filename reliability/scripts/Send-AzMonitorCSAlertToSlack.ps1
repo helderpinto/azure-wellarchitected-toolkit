@@ -19,7 +19,14 @@ if ($WebhookData)
     $AlertContext = [object] ($alertBody.data).alertContext
 
     $signalType = $alertEssentials.signalType
-    $targetIds = $alertEssentials.alertTargetIds -join ','
+    if (-not([string]::IsNullOrEmpty($AlertContext.sourceId)))
+    {
+        $targetIds = $AlertContext.sourceId
+    }
+    else
+    {
+        $targetIds = $alertEssentials.alertTargetIds -join ','
+    }
     $configurationItems = $alertEssentials.configurationItems -join ','
 
     $alertDescription = $alertEssentials.description
@@ -72,17 +79,28 @@ if ($WebhookData)
         short = 'false'
     }
 
-    if ($signalType -eq "Metric") {
-        # This is the near-real-time Metric Alert schema
+    if ($signalType -eq "Metric") {      
+        $attachmentFields += New-Object PSObject -Property @{
+            title = "$($AlertContext.condition.allOf[0].metricName) ($($AlertContext.condition.allOf[0].timeAggregation))"
+            value = "$($AlertContext.condition.allOf[0].metricValue)"
+            short = 'true'
+        }    
     }
     elseif ($signalType -eq "Log") {
 
-        $linkToSearchResults = $AlertContext.LinkToSearchResults
-
         $resultsCount = "N/A"
-        if ($AlertContext.SearchResults.tables)
+        if ($alertEssentials.monitoringService -eq "Log Alerts V2")
         {
-            $resultsCount = $AlertContext.SearchResults.tables[0].rows.Count
+            $linkToSearchResults = $AlertContext.condition.allOf[0].LinkToSearchResultsUI
+            if ($AlertContext.condition.allOf[0].metricValue)
+            {
+                $resultsCount = $AlertContext.condition.allOf[0].metricValue
+            }
+        }
+        else
+        {
+            $linkToSearchResults = $AlertContext.LinkToSearchResults    
+            $resultsCount = $AlertContext.ResultCount
         }
 
         $attachmentFields += New-Object PSObject -Property @{
@@ -162,7 +180,7 @@ if ($WebhookData)
 
     Write-Host $slackBody
 
-    if ($slackBody -ne $null)
+    if ($null -ne $slackBody)
     {
         $slackChannels = $slackChannelUrl.Split(",")
         foreach ($slackChannel in $slackChannels)
@@ -170,7 +188,6 @@ if ($WebhookData)
             Invoke-RestMethod -Uri $slackChannel -Method Post -body $slackBody -ContentType 'application/json; charset=utf-8'
         }        
      }
-
 }
 else {
     # Error
