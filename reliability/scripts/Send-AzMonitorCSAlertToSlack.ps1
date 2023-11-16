@@ -99,8 +99,11 @@ if ($WebhookData)
         }
         else
         {
-            $linkToSearchResults = $AlertContext.LinkToSearchResults    
-            $resultsCount = $AlertContext.ResultCount
+            if (-not([string]::IsNullOrEmpty($AlertContext.LinkToSearchResults)))
+            {
+                $linkToSearchResults = $AlertContext.LinkToSearchResults    
+                $resultsCount = $AlertContext.ResultCount    
+            }
         }
 
         $attachmentFields += New-Object PSObject -Property @{
