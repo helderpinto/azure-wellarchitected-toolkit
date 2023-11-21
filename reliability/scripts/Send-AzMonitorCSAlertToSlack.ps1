@@ -169,7 +169,7 @@ if ($WebhookData)
     
     $slackAttachments = @()
 
-    $alertText = "$alertDescription ($configurationItems)"
+    $alertText = "$alertDescription"
     $alertTitle = "Azure Monitor $signalType Alert - $($alertEssentials.alertRule)" 
 
     $slackAttachments += New-Object PSObject -Property @{
