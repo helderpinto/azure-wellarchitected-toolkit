@@ -5,8 +5,7 @@ Shuts down or starts VMs according to a JSON object that may include all or some
 an Azure Resource Graph condition to be added to a where clause (you can find an example in the parameter definition below).
 
 Requirements: 
-- System-assigned or User-assigned Managed Identity enabled for the Automation Account (recommended, default authentication option) or a Run As Account (in this case, you need to 
-    create an Automation Variable StartStopVMs_AuthenticationOption with the value set to RunAsAccount)
+- System-assigned or User-assigned Managed Identity enabled for the Automation Account (recommended, default authentication option)
 - If you are using a User-assigned Managed Identity, you must create a StartStopVMs_UserAssignedManagedIdentityClientID Automation Variable with the Managed Identity Client ID as value
 - In the scope of the automation (Management Group, Subscription, Resource Group, etc.), the Reader role assigned to the identity above and one of the following alternatives:
     - Virtual Machine Contributor
@@ -171,37 +170,17 @@ if ([string]::IsNullOrEmpty($cloudEnvironment))
 {
     $cloudEnvironment = "AzureCloud"
 }
-$authenticationOption = Get-AutomationVariable -Name "StartStopVMs_AuthenticationOption" -ErrorAction SilentlyContinue # RunAsAccount|ManagedIdentity
-if ([string]::IsNullOrEmpty($authenticationOption))
+
+$userAssignedMI = Get-AutomationVariable -Name "StartStopVMs_UserAssignedManagedIdentityClientID" -ErrorAction SilentlyContinue
+Write-Output "Logging in to Azure with ManagedIdentity $userAssignedMI..."
+
+if ($userAssignedMI)
 {
-    $authenticationOption = "ManagedIdentity"
+    Connect-AzAccount -Identity -AccountId $userAssignedMI -EnvironmentName $cloudEnvironment
 }
-
-Write-Output "Logging in to Azure with $authenticationOption..."
-
-switch ($authenticationOption) {
-    "RunAsAccount" { 
-        $ArmConn = Get-AutomationConnection -Name AzureRunAsConnection
-        Connect-AzAccount -ServicePrincipal -EnvironmentName $cloudEnvironment -Tenant $ArmConn.TenantID -ApplicationId $ArmConn.ApplicationID -CertificateThumbprint $ArmConn.CertificateThumbprint
-        break
-    }
-    "ManagedIdentity" { 
-        $userAssignedMI = Get-AutomationVariable -Name "StartStopVMs_UserAssignedManagedIdentityClientID" -ErrorAction SilentlyContinue
-        if ($userAssignedMI)
-        {
-            Connect-AzAccount -Identity -AccountId $userAssignedMI -EnvironmentName $cloudEnvironment
-        }
-        else
-        {
-            Connect-AzAccount -Identity -EnvironmentName $cloudEnvironment
-        }
-        break
-    }
-    Default {
-        $ArmConn = Get-AutomationConnection -Name AzureRunAsConnection
-        Connect-AzAccount -ServicePrincipal -EnvironmentName $cloudEnvironment -Tenant $ArmConn.TenantID -ApplicationId $ArmConn.ApplicationID -CertificateThumbprint $ArmConn.CertificateThumbprint
-        break
-    }
+else
+{
+    Connect-AzAccount -Identity -EnvironmentName $cloudEnvironment
 }
 
 Write-Output "Getting subscriptions target $TargetSubscription"
