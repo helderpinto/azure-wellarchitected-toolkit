@@ -42,7 +42,7 @@ Don't get it wrong, but using the cloud without visibility over how you spend yo
         * To connect to data, you must use an Enterprise Administrator account. The Enterprise Administrator (read only) role is supported.
     * Remediate [Azure Advisor cost recommendations](https://docs.microsoft.com/en-us/azure/advisor/advisor-cost-recommendations).
 * Give costs visibility to teams with [appropriate Azure RBAC](https://docs.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/track-costs#provide-the-right-level-of-cost-access). Remember: **if we don't know what we spend, we don't care about how much we spend**.
-* Identify custom cost optimization opportunities with the [Azure Optimization Engine](https://github.com/helderpinto/AzureOptimizationEngine)
+* Identify custom cost optimization opportunities with the [Azure Optimization Engine](https://aka.ms/AzureOptimizationEngine)
     * Deploy the engine in your environment and assess the initial results
     * Develop custom recommendations if needed
   
