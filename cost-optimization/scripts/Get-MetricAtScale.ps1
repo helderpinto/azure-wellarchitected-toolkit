@@ -2,6 +2,19 @@
 #Requires -Modules Az.Monitor
 #Requires -Modules Az.ResourceGraph
 
+<#
+    Usage examples: 
+    
+    ./Get-MetricAtScale.ps1 -Namespace "microsoft.storage/storageaccounts" -MetricName "Transactions" -Interval "P1D" -Aggregation "Total" 
+        -StartTime "2025-02-08T00:00:00Z" -EndTime "2025-03-05T00:00:00Z" 
+        -Filter "ApiName ne 'GetBlobServiceProperties' and ApiName ne 'EntityGroupTransaction' and ApiName ne 'GetFileServiceProperties' and ApiName ne 'GetContainerProperties' and ApiName ne 'ListContainers'" 
+        -ResourceIdARGQuery "resources | where type == 'microsoft.storage/storageaccounts' | project id,location | order by location,id"
+
+    ./Get-MetricAtScale.ps1 -Namespace "Microsoft.Storage/storageAccounts/fileServices" -MetricName "FileCapacity,FileShareSnapshotCount" -Interval "PT1H" 
+        -Aggregation "Average" -StartTime "2025-03-04T00:00:00Z" -EndTime "2025-03-05T00:00:00Z" 
+        -ResourceIdARGQuery "resources | where type == 'microsoft.storage/storageaccounts' | project id=strcat(id,'/fileservices/default'),location | order by location,id"        
+#>
+
 param (
     [Parameter(Mandatory=$false)]
     [String] $AzureEnvironment = "AzureCloud",
@@ -31,6 +44,9 @@ param (
 
     [Parameter(Mandatory=$true)]
     [String] $EndTime,
+
+    [Parameter(Mandatory=$false)]
+    [String] $Filter,
 
     [Parameter(Mandatory=$true)]
     [String] $ResourceIdARGQuery
@@ -147,7 +163,7 @@ foreach ($batch in $FinalResourceIdBatches)
     $region = $batch[0].Location
     $endpoint = "https://$region.metrics.monitor.azure.com"
     $response = Get-AzMetricsBatch -Endpoint $endpoint -Name $MetricName -Namespace $Namespace -Interval $Interval -Aggregation $Aggregation `
-        -EndTime $EndTime -StartTime $StartTime -ResourceId $batch.ResourceId -SubscriptionId $subscriptionId
+        -EndTime $EndTime -StartTime $StartTime -ResourceId $batch.ResourceId -Filter $Filter -SubscriptionId $subscriptionId
     Write-Output "Got $($response.Count) batch results for subscription $subscriptionId in $region region."
 
     foreach ($resource in $response)
@@ -170,6 +186,29 @@ foreach ($batch in $FinalResourceIdBatches)
         }
     }
 }
+
+Write-Output "Setting empty metrics for resources not found or with metrics filtered out..."
+
+$notFoundMetricsCounter = 0
+foreach ($argResource in $argResources)
+{
+    if (-not($argResource.id -in $metrics.ResourceId))
+    {
+        $notFoundMetricsCounter++
+        $metrics += [PSCustomObject]@{
+            ResourceId  = $argResource.id
+            Namespace   = $Namespace
+            Region      = $argResource.location
+            Metric      = $MetricName -join "&"
+            Unit        = "NotFound"
+            MetricValue = 0
+            Aggregation = $Aggregation
+            Timestamp   = $StartTime
+        }
+    }
+}
+
+Write-Output "Added $notFoundMetricsCounter resources with empty metrics"
 
 $file = "Metrics-$($MetricName -join "&")-$($Namespace.Replace("/","-"))-$($Aggregation)-$($Interval)-$([math]::Round(((Get-Date $EndTime) - (Get-Date $StartTime)).TotalHours))hrs-$((Get-Date $EndTime).ToString("yyyyMMddHHmmss")).csv"
 
