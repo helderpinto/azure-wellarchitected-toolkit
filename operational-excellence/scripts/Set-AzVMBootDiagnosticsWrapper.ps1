@@ -1,3 +1,47 @@
+<#
+.SYNOPSIS
+    Configures Boot Diagnostics for Azure Virtual Machines in bulk.
+
+.DESCRIPTION
+    This script uses Azure Resource Graph to identify Virtual Machines matching specific criteria and configures their Boot Diagnostics settings.
+    It supports enabling Managed Boot Diagnostics, enabling Boot Diagnostics with a specific Storage Account, or disabling Boot Diagnostics.
+    Only processes VMs that require changes to their current configuration.
+
+.PARAMETER TargetSubscriptionId
+    Optional list of Subscription IDs to process. If not provided, processes all enabled subscriptions in the current context.
+
+.PARAMETER Action
+    The action to perform:
+    - Disable: Disables Boot Diagnostics.
+    - EnableManaged: Switches to Managed Boot Diagnostics (recommended).
+    - EnableStorageAccount: Enables Boot Diagnostics pointing to a specific Storage Account (legacy).
+
+.PARAMETER ARGFilter
+    Optional Azure Resource Graph KQL filter to limit the scope (e.g., "resourceGroup == 'myRG'").
+
+.PARAMETER StorageAccountId
+    The Resource ID of the Storage Account to use. Required if Action is 'EnableStorageAccount'.
+
+.PARAMETER Cloud
+    Azure Cloud environment (default: AzureCloud).
+
+.PARAMETER Simulate
+    Runs the script in dry mode.
+
+.EXAMPLE
+    .\Set-AzVMBootDiagnosticsWrapper.ps1 -Action EnableManaged -ARGFilter "resourceGroup == 'production-rg'" -Simulate
+
+    Checks for VMs in 'production-rg' that do not have Managed Boot Diagnostics and simulates enabling it.
+
+.EXAMPLE
+    .\Set-AzVMBootDiagnosticsWrapper.ps1 -Action Disable -SubscriptionId "sub-guid-123"
+
+    Disables Boot Diagnostics for all VMs in subscription 'sub-guid-123'.
+
+.NOTES
+    Author: Hélder Pinto
+    Date: 2026
+#>
 param(
     [Parameter(Mandatory = $false)]
     [string] $Cloud = "AzureCloud",
@@ -144,3 +188,4 @@ switch ($Action) {
         throw "Invalid Action specified."
     }
 }
+
