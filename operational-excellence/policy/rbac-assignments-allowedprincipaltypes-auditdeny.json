@@ -28,12 +28,36 @@
           "MSI"
         ],
         "defaultValue": [ "Group", "ServicePrincipal", "MSI" ]
+      },
+      "exemptPrincipalIDs": {
+        "type": "array",
+        "metadata": {
+          "displayName": "Exempt Principal IDs",
+          "description": "Any Principal IDs included in this list will not have this Policy applied to them."
+        },
+        "defaultValue": []
       }
     },
     "policyRule": {
       "if": {
-        "field": "Microsoft.Authorization/roleAssignments/principalType",
-        "notIn": "[parameters('allowedPrincipalTypes')]"
+        "allOf": [
+          {
+            "equals": "Microsoft.Authorization/roleAssignments",
+            "field": "type"
+          },
+          {
+            "not": {
+              "field": "Microsoft.Authorization/roleAssignments/principalType",
+              "in": "[parameters('allowedPrincipalTypes')]"
+            }
+          },
+          {
+            "not": {
+              "field": "Microsoft.Authorization/roleAssignments/principalId",
+              "in": "[parameters('exemptPrincipalIDs')]"
+            }
+          }
+        ]
       },
       "then": {
         "effect": "[parameters('effect')]"
